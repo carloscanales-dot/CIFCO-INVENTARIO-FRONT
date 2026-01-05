@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <link rel="icon" href="/faviconc.ico" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CIFCO INVENTARIO</title>
+  <link rel="stylesheet" type="text/css" href="/loader.css" />
+
+  <style>
+    /* Fondo blanco y texto con color #31395c */
+    body {
+      background-color: #ffffff;
+      color: #31395c;
+      font-family: Arial, sans-serif;
+    }
+
+    #loading-bg {
+      background-color: #ffffff;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+
+    .loading-logo img {
+      width: 220px;
+      height: auto;
+      margin-bottom: 20px;
+    }
+
+    .loading-text {
+      font-size: 28px;
+      color: #31395c;
+      font-weight: bold;
+      text-align: center;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="app">
+    <div id="loading-bg">
+      <div class="loading-logo">
+        <!-- Reemplazamos la cruz verde por tu logo -->
+        <img src="/src/assets/images/logos/logoindexcifco.png" alt="CIFCO Logo" />
+      </div>
+
+      <div class="loading-text">
+        CIFCO INVENTARIO
+      </div>
+
+      <!-- Loader original intacto -->
+      <div class="loading">
+        <div class="effect-1 effects"></div>
+        <div class="effect-2 effects"></div>
+        <div class="effect-3 effects"></div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="/src/main.js"></script>
+
+  <script>
+    // Ajuste de colores para el loader
+    const loaderColor = '#ffffff'
+    const primaryColor = '#31395c'
+
+    document.documentElement.style.setProperty('--initial-loader-bg', loaderColor)
+    document.documentElement.style.setProperty('--initial-loader-color', primaryColor)
+  </script>
+</body>
+
+</html>
