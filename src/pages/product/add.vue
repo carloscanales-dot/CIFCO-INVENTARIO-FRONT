@@ -250,13 +250,13 @@ const store = async () => {
       }, 15);
       return;
     }
-    if (fileData.value.length == 0) {
-      setTimeout(() => {
-        warning.value = "Es requerido agregar una imagen al producto";
-      }, 15);
-      return;
-    }
-    if (product.value.is_discount == 2 && product.value.max_discount <= 0) {
+    // if(fileData.value.length == 0){
+    //   setTimeout(() => {
+    //     warning.value = "Es requerido agregar una imagen al producto";
+    //   }, 15);
+    //   return;
+    // }
+    if(product.value.is_discount == 2 && product.value.max_discount <= 0){
       setTimeout(() => {
         warning.value = "Es requerido agregar una descuento maximo al producto";
       }, 15);
@@ -277,15 +277,15 @@ const store = async () => {
 
     let formData = new FormData();
 
-    formData.append("title", product.value.title);
-    formData.append("sku", product.value.sku);
-    formData.append("price_general", product.value.price_general);
-    formData.append("price_company", product.value.price_company);
-    formData.append("description", product.value.description);
-    formData.append("product_categorie_id", product.value.product_categorie_id);
-    formData.append("image", fileData.value[0].file);
-    formData.append("product_warehouses", JSON.stringify(product_warehouses.value));
-    formData.append("product_wallets", JSON.stringify(product_wallets.value));
+    formData.append("title",product.value.title);
+    formData.append("sku",product.value.sku);
+    formData.append("price_general",product.value.price_general);
+    formData.append("price_company",product.value.price_company);
+    formData.append("description",product.value.description);
+    formData.append("product_categorie_id",product.value.product_categorie_id);
+    // formData.append("image",fileData.value[0].file);
+    formData.append("product_warehouses",JSON.stringify(product_warehouses.value));
+    formData.append("product_wallets",JSON.stringify(product_wallets.value));
 
     formData.append("is_gift", product.value.is_gift == false ? 1 : product.value.is_gift);
     formData.append("is_discount", product.value.is_discount == false ? 1 : product.value.is_discount);
