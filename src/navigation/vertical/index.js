@@ -73,16 +73,16 @@ export default [
       },
     ],
   },
-  { heading: 'Clientes',permissions: ['list_product','register_product','list_client','register_sale','list_sale','return'] },
+  { heading: 'Solicitante',permissions: ['list_product','register_product','list_client','register_sale','list_sale','return'] },
   {
-    title: 'Clientes',
+    title: 'Solicitantes',
     icon: { icon: 'ri-team-line' },
     permission: 'list_client',
     to: 'client-list',
   },
-  { heading: 'Ventas',permissions: ['list_product','register_product','list_client','register_sale','list_sale','return'] },
+  { heading: 'Salidas',permissions: ['list_product','register_product','list_client','register_sale','list_sale','return'] },
     {
-    title: 'Ventas',
+    title: 'Salidas',
     icon: { icon: 'ri-exchange-dollar-line' },
     children: [
       {
@@ -105,9 +105,9 @@ export default [
     permission: 'return',
     to: 'refound-list',
   },*/
-  { heading: 'Compras',permissions: ['register_purchase','list_purchase','register_transport','list_transport','conversions','kardex'] },
+  { heading: 'Entradas',permissions: ['register_purchase','list_purchase','register_transport','list_transport','conversions','kardex'] },
   {
-    title: 'Compras',
+    title: 'Entradas',
     icon: { icon: 'ri-shopping-cart-line' },
     children: [
       {

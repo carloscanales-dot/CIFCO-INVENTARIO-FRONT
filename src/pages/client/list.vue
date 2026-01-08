@@ -9,7 +9,7 @@
             key: 'full_name',
         },
         {
-            title: 'Tipo Cliente',
+            title: 'Area de Solicitante',
             key: 'type_client',
         },
         {
@@ -143,7 +143,7 @@
 </script>
 <template>
     <div>
-        <VCard title="Gestión de Clientes">
+        <VCard title="Gestión de Solicitantes">
             <VCardText>
                 <VRow class="justify-space-between">
                     <VCol cols="3">
@@ -159,7 +159,7 @@
                         <VRow>
                             <VCol cols="6" class="text-end">
                                 <VBtn  v-if="isPermission('register_client')" @click="isClientFinalAddDialogVisible = !isClientFinalAddDialogVisible">
-                                    Cliente Final
+                                    Solicitante
                                     <VIcon
                                         end
                                         icon="ri-walk-line"

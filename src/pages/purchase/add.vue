@@ -234,7 +234,7 @@ definePage({ meta: { permission: 'register_purchase', } });
         <div class="d-flex flex-wrap justify-space-between gap-4 mb-6">
             <div class="d-flex flex-column justify-center">
                 <h4 class="text-h4 mb-1">
-                    Agregar Nueva Compra
+                    Agregar Nueva Entrada
                 </h4>
             </div>
         </div>
