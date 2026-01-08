@@ -250,12 +250,12 @@ const store = async() => {
       }, 15);
       return;
     }
-    if(fileData.value.length == 0){
-      setTimeout(() => {
-        warning.value = "Es requerido agregar una imagen al producto";
-      }, 15);
-      return;
-    }
+    // if(fileData.value.length == 0){
+    //   setTimeout(() => {
+    //     warning.value = "Es requerido agregar una imagen al producto";
+    //   }, 15);
+    //   return;
+    // }
     if(product.value.is_discount == 2 && product.value.max_discount <= 0){
       setTimeout(() => {
         warning.value = "Es requerido agregar una descuento maximo al producto";
@@ -283,7 +283,7 @@ const store = async() => {
     formData.append("price_company",product.value.price_company);
     formData.append("description",product.value.description);
     formData.append("product_categorie_id",product.value.product_categorie_id);
-    formData.append("image",fileData.value[0].file);
+    // formData.append("image",fileData.value[0].file);
     formData.append("product_warehouses",JSON.stringify(product_warehouses.value));
     formData.append("product_wallets",JSON.stringify(product_wallets.value));
 
