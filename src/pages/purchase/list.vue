@@ -136,7 +136,7 @@ definePage({ meta: { permission: 'list_purchase', } });
             <!-- FILTROS -->
             <VRow dense>
                 <!-- BLOQUE FILTROS -->
-                <VCol cols="12" lg="10">
+                <VCol cols="12" lg="12">
                     <VRow dense>
                         <!-- FILTROS -->
                         <VCol cols="12" sm="6" md="4" lg="3">
@@ -146,67 +146,69 @@ definePage({ meta: { permission: 'list_purchase', } });
 
                         <VCol cols="12" sm="6" md="4" lg="3">
                             <VSelect v-model="warehouse_id" :items="warehouses" item-title="name" item-value="id"
-                                label="Almacén"  density="compact" />
+                                label="Almacén" density="compact" />
                         </VCol>
 
                         <VCol cols="12" sm="6" md="4" lg="3">
-                            <VSelect v-model="unit_id" :items="units" item-title="name"  density="compact" item-value="id"
-                                label="Unidad" />
+                            <VSelect v-model="unit_id" :items="units" item-title="name" density="compact"
+                                item-value="id" label="Unidad" />
                         </VCol>
 
                         <VCol cols="12" sm="6" md="4" lg="3">
-                            <VSelect v-model="provider_id" :items="providers" item-title="full_name"  density="compact" item-value="id"
-                                label="Proveedor" />
+                            <VSelect v-model="provider_id" :items="providers" item-title="full_name" density="compact"
+                                item-value="id" label="Proveedor" />
                         </VCol>
 
-                        <VCol cols="12" sm="6" md="4" lg="3">
+                        <VCol cols="12" sm="6" md="4" lg="4">
                             <VSelect v-model="type_comprobant" :items="[
                                 'FACTURA ELECTRÓNICA',
                                 'CRÉDITO FISCAL',
                                 'NOTA DE CREDITO',
                                 'NOTA DE DEBITO'
-                            ]" label="Tipo de comprobante"  density="compact"/>
+                            ]" label="Tipo de comprobante" density="compact" />
                         </VCol>
 
-                        <VCol cols="12" sm="6" md="4" lg="3">
+                        <VCol cols="12" sm="6" md="4" lg="4">
                             <AppDateTimePicker v-model="range_date" density="compact" label="Rango de fecha"
                                 :config="{ mode: 'range' }" />
                         </VCol>
 
-                        <VCol cols="12" sm="6" md="4" lg="3">
+                        <VCol cols="12" sm="6" md="4" lg="4">
                             <VTextField v-model="search_product" label="Producto" density="compact"
                                 @keyup.enter="list" />
                         </VCol>
 
                         <!-- ACCIONES -->
-                        <VCol cols="12" lg="3">
-                            <VRow dense>
-                                <VCol cols="12">
-                                    <VBtn block color="info" prepend-icon="ri-search-2-line" @click="list">
-                                        Buscar
-                                    </VBtn>
-                                </VCol>
-                            </VRow>
-                        </VCol>
-                         <VCol cols="12" lg="3">
-                            <VRow dense>
-                                <VCol cols="12">
-                                    <VBtn block color="secondary" prepend-icon="ri-restart-line" @click="reset">
-                                        Limpiar
-                                    </VBtn>
-                                </VCol>
-                            </VRow>
-                        </VCol>
-                         <VCol cols="12" lg="3">
-                            <VRow dense>
-                                <VCol cols="12" v-if="isPermission('register_purchase')">
-                                    <VBtn block color="primary" @click="router.push({ name: 'purchase-add' })">
-                                        Nueva compra
-                                        <VIcon end icon="ri-shopping-cart-2-line" />
-                                    </VBtn>
-                                </VCol>
-                            </VRow>
-                        </VCol>
+                        <VRow dense>
+                            <VCol cols="12" lg="4">
+                                <VRow dense>
+                                    <VCol cols="12">
+                                        <VBtn block color="info" prepend-icon="ri-search-2-line" @click="list">
+                                            Buscar
+                                        </VBtn>
+                                    </VCol>
+                                </VRow>
+                            </VCol>
+                            <VCol cols="12" lg="4">
+                                <VRow dense>
+                                    <VCol cols="12">
+                                        <VBtn block color="primary" prepend-icon="ri-restart-line" @click="reset">
+                                            Limpiar
+                                        </VBtn>
+                                    </VCol>
+                                </VRow>
+                            </VCol>
+                            <VCol cols="12" lg="4">
+                                <VRow dense>
+                                    <VCol cols="12" v-if="isPermission('register_purchase')">
+                                        <VBtn block color="primary" @click="router.push({ name: 'purchase-add' })">
+                                            Nueva compra
+                                            <VIcon end icon="ri-shopping-cart-2-line" />
+                                        </VBtn>
+                                    </VCol>
+                                </VRow>
+                            </VCol>
+                        </VRow>
                     </VRow>
                 </VCol>
 

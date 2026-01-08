@@ -531,18 +531,18 @@ definePage({ meta: { permission: 'register_sale', } });
             <VCardText>
                 <VRow dense>
                     <!-- DATOS GENERALES -->
-                    <VCol cols="12" md="2">
+                    <VCol cols="12" md="4">
                         <AppDateTimePicker v-model="date_emision" density="compact" label="Fecha de emisión"
                             placeholder="Seleccionar fecha" />
                     </VCol>
 
-                    <VCol cols="12" md="3">
+                    <VCol cols="12" md="4">
                         <VSelect v-model="warehouse_id" :items="warehouses" density="compact" item-title="name"
                             item-value="id" label="Almacén" placeholder="Seleccionar" />
                     </VCol>
 
                     <!-- CLIENTE -->
-                    <VCol cols="12" md="3">
+                    <VCol cols="12" md="4">
                         <VRow dense>
                             <VCol cols="12">
                                 <VTextField v-model="search_client" density="compact" label="Solicitante"
@@ -564,21 +564,33 @@ definePage({ meta: { permission: 'register_sale', } });
                         </VRow>
                     </VCol>
 
+                    <VCol cols="12" md="4">
+                        <VTextField v-model="search_client" density="compact" label="N° Requisición" />
+                    </VCol>
+                    <VCol cols="12" md="4">
+                        <VSelect v-model="warehouse_id" :items="warehouses" density="compact" item-title="name"
+                            item-value="id" label="Area" placeholder="Seleccionar" />
+                    </VCol>
+                    <VCol cols="12" md="4">
+                        <VTextField v-model="search_client" density="compact" label="N° Requisición" />
+                    </VCol>
                     <!-- ACCIONES -->
-                    <VCol cols="12" md="2" class="d-flex flex-column justify-end gap-2">
-                        <VBtn color="primary" block
-                            @click="isClientFinalAddDialogVisible = !isClientFinalAddDialogVisible">
-                            <VIcon start icon="ri-user-add-line" />
-                            Cliente final
-                        </VBtn>
-                    </VCol>
-                    <VCol cols="12" md="2" class="d-flex flex-column justify-end gap-2">
-                        <VBtn color="primary" block
-                            @click="isClientCompanyAddDialogVisible = !isClientCompanyAddDialogVisible">
-                            <VIcon start icon="ri-community-line" />
-                            Empresa
-                        </VBtn>
-                    </VCol>
+                     <VRow dense>
+                         <VCol cols="12" md="6" class="d-flex flex-column justify-end gap-2">
+                             <VBtn color="primary" block
+                                 @click="isClientFinalAddDialogVisible = !isClientFinalAddDialogVisible">
+                                 <VIcon start icon="ri-user-add-line" />
+                                 Cliente final
+                             </VBtn>
+                         </VCol>
+                         <VCol cols="12" md="6" class="d-flex flex-column justify-end gap-2">
+                             <VBtn color="primary" block
+                                 @click="isClientCompanyAddDialogVisible = !isClientCompanyAddDialogVisible">
+                                 <VIcon start icon="ri-community-line" />
+                                 Empresa
+                             </VBtn>
+                         </VCol>
+                     </VRow>
                 </VRow>
             </VCardText>
         </VCard>
@@ -712,7 +724,7 @@ definePage({ meta: { permission: 'register_sale', } });
                                     'EFECTIVO',
                                     'DEPOSITO',
                                     'TRANSFERENCIA'
-                                ]"/>
+                                ]" />
                             </VCol>
 
                             <VCol cols="12" sm="4">
