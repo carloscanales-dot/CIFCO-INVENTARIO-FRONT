@@ -16,21 +16,21 @@ const moreList = [
     value: 'share',
   },
 ]
-const year_list = ref(['2024','2025','2026','2027','2028','2029']);
-const year_selected = ref(new Date().getFullYear()+"");
+const year_list = ref(['2024', '2025', '2026', '2027', '2028', '2029', '2030']);
+const year_selected = ref(new Date().getFullYear() + "");
 const vuetifyTheme = useTheme()
 
-const sales_for_month_year = async() => {
+const sales_for_month_year = async () => {
   try {
-    
-    const resp = await $api("kpi/sales_x_month_of_year",{
-        method: 'POST',
-        body:{
-          year: year_selected.value,
-        },
-        onResponseError({response}){
-            console.log(response._data.error);
-        }
+
+    const resp = await $api("kpi/sales_x_month_of_year", {
+      method: 'POST',
+      body: {
+        year: year_selected.value,
+      },
+      onResponseError({ response }) {
+        console.log(response._data.error);
+      }
     })
     console.log(resp);
     let categories_labels = [];
@@ -45,8 +45,8 @@ const sales_for_month_year = async() => {
     });
     const themeColors = vuetifyTheme.current.value.colors
     const variableTheme = vuetifyTheme.current.value.variables
-    const disabledText = `rgba(${ hexToRgb(String(themeColors['on-background'])) },${ variableTheme['disabled-opacity'] })`
-    
+    const disabledText = `rgba(${hexToRgb(String(themeColors['on-background']))},${variableTheme['disabled-opacity']})`
+
     chartConfig.value = {
       chart: {
         stacked: true,
@@ -72,8 +72,8 @@ const sales_for_month_year = async() => {
         colors: [themeColors.warning],
       },
       colors: [
-        `rgba(${ hexToRgb(String(themeColors.primary)) }, 1)`,
-        `rgba(${ hexToRgb(String(themeColors.primary)) }, 0.12)`,
+        `rgba(${hexToRgb(String(themeColors.primary))}, 1)`,
+        `rgba(${hexToRgb(String(themeColors.primary))}, 0.12)`,
       ],
       dataLabels: { enabled: false },
       states: {
@@ -149,14 +149,14 @@ const sales_for_month_year = async() => {
     ]
     salesReport.value = [
       {
-        title: 'Ventas - '+year_selected.value,
-        amount: "$. " +resp.total_sales_year_current,
+        title: 'Ventas - ' + year_selected.value,
+        amount: "$ " + resp.total_sales_year_current,
         avatarColor: '#ACF5C9',
         avatarIcon: 'ri-money-dollar-circle-line',
       },
       {
-        title: 'Ventas - '+(Number(year_selected.value) - 1),
-        amount: "$. " +resp.total_sales_year_before,
+        title: 'Ventas - ' + (Number(year_selected.value) - 1),
+        amount: "$ " + resp.total_sales_year_before,
         avatarColor: '#ACF5C9',
         avatarIcon: 'ri-money-dollar-circle-line',
       },
@@ -166,7 +166,7 @@ const sales_for_month_year = async() => {
   }
 }
 
-watch(year_selected,() => {
+watch(year_selected, () => {
   sales_for_month_year();
 })
 
@@ -182,102 +182,127 @@ onMounted(() => {
 </script>
 
 <template>
-  <VCard elevation="2" class="analytics-card">
-    <VCardTitle class="d-flex justify-space-between align-center pa-4">
-      <div>
-        <h2 class="text-h5 mb-1">Ventas por Año</h2>
-        <VChip
-          size="small"
-          color="primary"
-          variant="flat"
-          class="font-weight-medium"
-        >
-          Comparativa Mensual
-        </VChip>
-      </div>
-      
-      <VSelect
-        :items="year_list"
-        v-model="year_selected"
-        label="Seleccionar Año"
-        density="comfortable"
-        variant="outlined"
-        hide-details
-        class="year-selector"
-        style="max-width: 150px"
-      />
+  <VCard class="analytics-card" elevation="0">
+    <!-- HEADER -->
+    <VCardTitle class="analytics-header">
+      <VRow align="center">
+        <VCol cols="12" md="8">
+          <div class="header-text">
+            <h2>Ventas por Año</h2>
+            <span class="subtitle">Comparativa mensual de ingresos</span>
+          </div>
+        </VCol>
+
+        <VCol cols="12" md="4" class="d-flex justify-end">
+          <VSelect v-model="year_selected" :items="year_list" label="Año" density="comfortable" variant="outlined"
+            hide-details class="year-selector" />
+        </VCol>
+      </VRow>
     </VCardTitle>
 
-    <VCardText>
-      <VRow class="sales-summary mb-6">
-        <VCol
-          v-for="sale in salesReport"
-          :key="sale.title"
-          cols="12"
-          sm="6"
-        >
-          <VCard
-            variant="flat"
-            :color="sale.avatarColor"
-            class="sales-card pa-4"
-          >
-            <div class="d-flex align-center gap-4">
-              <VAvatar
-                size="48"
-                rounded
-                variant="tonal"
-                :color="sale.avatarColor"
-              >
-                <VIcon size="24" :icon="sale.avatarIcon" />
+    <VCardText class="pt-2">
+      <!-- SUMMARY -->
+      <VRow class="sales-summary" dense>
+        <VCol v-for="sale in salesReport" :key="sale.title" cols="12" md="6">
+          <VCard class="summary-card" elevation="0">
+            <div class="d-flex align-center">
+              <VAvatar size="52" variant="tonal" :color="sale.avatarColor" class="me-4">
+                <VIcon :icon="sale.avatarIcon" size="26" />
               </VAvatar>
+
               <div>
-                <div class="text-subtitle-2 mb-1">
+                <div class="summary-title">
                   {{ sale.title }}
                 </div>
-                <h6 class="text-h5 font-weight-bold">
+                <div class="summary-amount">
                   {{ sale.amount }}
-                </h6>
+                </div>
               </div>
             </div>
           </VCard>
         </VCol>
       </VRow>
 
-      <VueApexCharts
-        id="weekly-sales-chart"
-        type="line"
-        height="300"
-        :options="chartConfig"
-        :series="series"
-        class="sales-chart"
-      />
+      <!-- CHART -->
+      <VRow>
+        <VCol cols="12">
+          <div class="chart-wrapper">
+            <VueApexCharts id="sales-year-chart" type="line" height="320" :options="chartConfig" :series="series" />
+          </div>
+        </VCol>
+      </VRow>
     </VCardText>
   </VCard>
 </template>
 
-<style lang="scss" scoped>
+
+<style scoped lang="scss">
 .analytics-card {
-  border-radius: 12px;
-  
-  .sales-summary {
-    .sales-card {
-      transition: transform 0.2s;
-      border-radius: 8px;
-      
-      &:hover {
-        transform: translateY(-4px);
-      }
-    }
+  border-radius: 14px;
+  background-color: rgb(var(--v-theme-surface));
+}
+
+/* HEADER */
+.analytics-header {
+  padding: 1.5rem 1.5rem 1rem;
+}
+
+.header-text {
+  h2 {
+    font-size: 1.4rem;
+    font-weight: 700;
+    margin-bottom: 0.25rem;
   }
-  
-  .sales-chart {
-    .apexcharts-series[rel="2"] {
-      transform: translateY(-8px);
-    }
+
+  .subtitle {
+    font-size: 0.85rem;
+    color: rgb(var(--v-theme-on-surface), 0.6);
   }
 }
 
-.year-selector :deep(.v-field) {
-  border-radius: 8px;
+/* SELECT */
+.year-selector {
+  max-width: 160px;
+
+  :deep(.v-field) {
+    border-radius: 10px;
+  }
+}
+
+/* SUMMARY CARDS */
+.sales-summary {
+  margin-bottom: 1.5rem;
+}
+
+.summary-card {
+  padding: 1.25rem;
+  border-radius: 12px;
+  background: linear-gradient(180deg,
+      rgba(var(--v-theme-primary), 0.05),
+      rgba(var(--v-theme-primary), 0.02));
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+
+  &:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 10px 24px rgba(0, 0, 0, 0.08);
+  }
+}
+
+.summary-title {
+  font-size: 0.85rem;
+  color: rgb(var(--v-theme-on-surface), 0.65);
+}
+
+.summary-amount {
+  font-size: 1.25rem;
+  font-weight: 700;
+}
+
+/* CHART */
+.chart-wrapper {
+  margin-top: 1rem;
+  padding: 1rem;
+  border-radius: 14px;
+  background-color: rgb(var(--v-theme-surface));
 }
 </style>
