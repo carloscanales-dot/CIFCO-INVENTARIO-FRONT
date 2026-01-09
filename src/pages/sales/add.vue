@@ -515,7 +515,7 @@ definePage({ meta: { permission: 'register_sale', } });
         <div class="d-flex flex-wrap justify-space-between gap-4 mb-6">
             <div class="d-flex flex-column justify-center">
                 <h4 class="text-h4 mb-1">
-                    Gestión de Ventas o Cotización
+                    Gestión de Salidas o Cotización
                 </h4>
                 <p class="text-body-1 mb-0">
                     Pedidos realizados en la tienda
@@ -575,22 +575,22 @@ definePage({ meta: { permission: 'register_sale', } });
                         <VTextField v-model="search_client" density="compact" label="N° Requisición" />
                     </VCol>
                     <!-- ACCIONES -->
-                     <VRow dense>
-                         <VCol cols="12" md="6" class="d-flex flex-column justify-end gap-2">
-                             <VBtn color="primary" block
-                                 @click="isClientFinalAddDialogVisible = !isClientFinalAddDialogVisible">
-                                 <VIcon start icon="ri-user-add-line" />
-                                 Cliente final
-                             </VBtn>
-                         </VCol>
-                         <VCol cols="12" md="6" class="d-flex flex-column justify-end gap-2">
-                             <VBtn color="primary" block
-                                 @click="isClientCompanyAddDialogVisible = !isClientCompanyAddDialogVisible">
-                                 <VIcon start icon="ri-community-line" />
-                                 Empresa
-                             </VBtn>
-                         </VCol>
-                     </VRow>
+                    <VRow dense>
+                        <VCol cols="12" md="6" class="d-flex flex-column justify-end gap-2">
+                            <VBtn color="primary" block
+                                @click="isClientFinalAddDialogVisible = !isClientFinalAddDialogVisible">
+                                <VIcon start icon="ri-user-add-line" />
+                                Cliente final
+                            </VBtn>
+                        </VCol>
+                        <VCol cols="12" md="6" class="d-flex flex-column justify-end gap-2">
+                            <VBtn color="primary" block
+                                @click="isClientCompanyAddDialogVisible = !isClientCompanyAddDialogVisible">
+                                <VIcon start icon="ri-community-line" />
+                                Empresa
+                            </VBtn>
+                        </VCol>
+                    </VRow>
                 </VRow>
             </VCardText>
         </VCard>
@@ -709,15 +709,18 @@ definePage({ meta: { permission: 'register_sale', } });
                             </VCardText>
                         </VCard>
                     </VCol>
+                    <VCol cols="12">
+                        <VBtn block size="large" color="primary" @click="store">
+                            Crear {{ selectedRadio == 1 ? 'Salida' : 'Cotización' }}
+                        </VBtn>
+                    </VCol>
                 </VRow>
             </VCardText>
         </VCard>
-        <VCard class="mb-6">
+        <!-- <VCard class="mb-6">
             <VCardText>
                 <VRow dense>
-                    <!-- BLOQUE PAGOS -->
                     <VCol cols="12" md="8" v-if="selectedRadio == 1">
-                        <!-- INGRESO DE PAGO -->
                         <VRow dense>
                             <VCol cols="12" sm="4">
                                 <VSelect v-model="method_payment" density="compact" label="Método de pago" :items="[
@@ -745,7 +748,6 @@ definePage({ meta: { permission: 'register_sale', } });
                             </VCol>
                         </VRow>
 
-                        <!-- LISTA DE PAGOS -->
                         <VRow dense class="mt-4">
                             <VCol cols="12">
                                 <div class="table-responsive">
@@ -792,34 +794,22 @@ definePage({ meta: { permission: 'register_sale', } });
                             </VCol>
                         </VRow>
                     </VCol>
-
-                    <!-- DESCRIPCIÓN -->
                     <VCol cols="12" md="4">
                         <VTextarea v-model="description" label="Descripción" rows="8" />
                     </VCol>
-
-                    <!-- ALERTAS -->
                     <VCol cols="12" v-if="warning_sale">
                         <VAlert color="warning" variant="tonal" closable>
                             {{ warning_sale }}
                         </VAlert>
                     </VCol>
-
                     <VCol cols="12" v-if="success_sale">
                         <VAlert color="success" variant="tonal" closable>
                             {{ success_sale }}
                         </VAlert>
                     </VCol>
-
-                    <!-- ACCIÓN FINAL -->
-                    <VCol cols="12">
-                        <VBtn block size="large" color="primary" @click="store">
-                            Crear {{ selectedRadio == 1 ? 'Venta' : 'Cotización' }}
-                        </VBtn>
-                    </VCol>
                 </VRow>
             </VCardText>
-        </VCard>
+        </VCard> -->
 
         <ClientSearchDialog v-if="list_clients.length > 0 && isClientSearchDialogVisible"
             v-model:isDialogVisible="isClientSearchDialogVisible" :listClients="list_clients"

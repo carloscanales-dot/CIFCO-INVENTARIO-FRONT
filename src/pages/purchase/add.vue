@@ -243,58 +243,72 @@ definePage({ meta: { permission: 'register_purchase', } });
             <VCol cols="12">
                 <VCard class="mb-6" title="Información General">
                     <VCardText>
-                        <VRow>
-                            <VCol cols="3">
-                                <VTextField label="Area Solicitante" placeholder="" disabled v-model="user.full_name" />
+                        <VRow dense>
+                            <!-- USUARIO / SUCURSAL -->
+                            <VCol cols="12" sm="6" md="3">
+                                <VTextField v-model="user.full_name" label="Administrador de inventario" disabled />
                             </VCol>
-                            <VCol cols="3">
-                                <VTextField label="Sucursal" placeholder="" disabled v-model="user.sucursale.name" />
+
+                            <VCol cols="12" sm="6" md="3">
+                                <VTextField v-model="user.sucursale.name" label="Sucursal" disabled />
                             </VCol>
-                            <VCol cols="3">
-                                <VSelect v-model="warehouse_id" :items="warehouses" label="Bodegas"
-                                    placeholder="Select Almacen" item-title="name" item-value="id" eager />
+
+                            <!-- BODEGA / PROVEEDOR -->
+                            <VCol cols="12" sm="6" md="3">
+                                <VSelect v-model="warehouse_id" :items="warehouses" item-title="name" item-value="id"
+                                    label="Bodega" placeholder="Seleccionar bodega" eager />
                             </VCol>
-                            <VCol cols="3">
-                                <VSelect v-model="provider_id" :items="providers" label="Proveedores"
-                                    placeholder="Select Proveedor" item-title="full_name" item-value="id" eager />
+
+                            <VCol cols="12" sm="6" md="3">
+                                <VSelect v-model="provider_id" :items="providers" item-title="full_name" item-value="id"
+                                    label="Proveedor" placeholder="Seleccionar proveedor" eager />
                             </VCol>
-                        </VRow>
-                        <VRow>
-                            <VCol cols="3">
-                                <AppDateTimePicker label="Fecha de recepción" placeholder="Select date"
-                                    v-model="date_emision" />
+
+                            <!-- FECHAS -->
+                            <VCol cols="12" sm="6" md="3">
+                                <AppDateTimePicker v-model="date_emision" label="Fecha de recepción"
+                                    placeholder="Seleccionar fecha" />
                             </VCol>
-                            <VCol cols="3">
-                                <VSelect :items="[
+
+                            <VCol cols="12" sm="6" md="3">
+                                <VSelect v-model="type_comprobant" :items="[
                                     'FACTURA ELECTRÓNICA',
                                     'CRÉDITO FISCAL',
                                     'NOTA DE CREDITO',
                                     'NOTA DE DEBITO',
                                     'PENDIENTE DE DOCUMENTO',
                                     'NOTA DE REMISIÓN'
-                                ]" v-model="type_comprobant" label="Tipo de Comprobantes" placeholder="Select Tipo"
-                                    eager />
+                                ]" label="Tipo de comprobante" />
                             </VCol>
-                            <VCol cols="3">
-                                <VTextField v-model="n_comprobant" label="N° de Comprobante" placeholder="" />
+
+                            <!-- COMPROBANTES -->
+                            <VCol cols="12" sm="6" md="3">
+                                <VTextField v-model="n_comprobant" label="N° de comprobante" />
                             </VCol>
-                            <VCol cols="3">
-                                <VTextField v-model="n_comprobant" label="N° ODC" placeholder="" />
+
+                            <VCol cols="12" sm="6" md="3">
+                                <VTextField v-model="n_comprobant" label="N° ODC" />
                             </VCol>
-                            <VCol cols="3">
-                                <AppDateTimePicker label="Fecha documento de recepción" placeholder="Select date"
-                                    v-model="date_emision" />
+
+                            <VCol cols="12" sm="6" md="3">
+                                <AppDateTimePicker v-model="date_emision" label="Fecha documento de recepción"
+                                    placeholder="Seleccionar fecha" />
                             </VCol>
-                            <VCol cols="3">
-                                <VTextarea label="Observaciones" placeholder="" v-model="description" rows="2" />
+
+                            <!-- OBSERVACIONES -->
+                            <VCol cols="9" sm="6" md="9">
+                                <VTextarea v-model="description" label="Observaciones" rows="1" />
                             </VCol>
+
+                            <!-- ALERTAS -->
                             <VCol cols="12" v-if="warning_purchase">
-                                <VAlert closable close-label="Close Alert" color="warning">
+                                <VAlert color="warning" variant="tonal" closable>
                                     {{ warning_purchase }}
                                 </VAlert>
                             </VCol>
+
                             <VCol cols="12" v-if="success_purchase">
-                                <VAlert closable close-label="Close Alert" color="success">
+                                <VAlert color="success" variant="tonal" closable>
                                     {{ success_purchase }}
                                 </VAlert>
                             </VCol>
@@ -340,7 +354,7 @@ definePage({ meta: { permission: 'register_purchase', } });
                                     <VCol cols="12" class="d-flex justify-end mt-2">
                                         <VBtn color="primary" class="px-6" @click="addProduct()">
                                             <VIcon icon="ri-shopping-cart-line" class="me-2" />
-                                            Registrar compra
+                                            Registrar Ingreso
                                         </VBtn>
                                     </VCol>
                                 </VRow>
@@ -350,7 +364,7 @@ definePage({ meta: { permission: 'register_purchase', } });
                 </VCard>
             </VCol>
             <VCol cols="12">
-                <VCard class="mb-6" title="Detalle de la compra">
+                <VCard class="mb-6" title="Detalle del Ingreso">
                     <VCardText>
                         <!-- TABLA -->
                         <VTable density="comfortable">
@@ -402,7 +416,6 @@ definePage({ meta: { permission: 'register_purchase', } });
                         </VRow>
                     </VCardText>
                 </VCard>
-
             </VCol>
             <VCol cols="12">
                 <VBtn block @click="store">
