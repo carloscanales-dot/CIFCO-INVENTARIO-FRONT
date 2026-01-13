@@ -84,12 +84,8 @@ const update = async() => {
     }else{
       success.value = "La existencia se ha editado correctamente";
       emit("editWarehouseProduct",resp.product_warehouse);
-    //   name.value = '';
-    //   description.value = '';
       warning.value = null;
       error_exits.value = null;
-    //   success.value = null;
-    //   onFormReset();
     }
   } catch (error) {
     console.log(error);

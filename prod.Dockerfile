@@ -28,11 +28,17 @@ RUN \
 # Use Nginx as the production server
 FROM nginx:stable-alpine
 
+# Remove default Nginx configuration
+RUN rm -f /etc/nginx/conf.d/default.conf
+
 # Copy the custom Nginx configuration file
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 
 # Copy the built Vue.js files to the Nginx web server directory
 COPY --from=builder /app/dist /usr/share/nginx/html
+
+# Verify the configuration is correct
+RUN nginx -t
 
 # Expose port 80 for Nginx
 EXPOSE 80

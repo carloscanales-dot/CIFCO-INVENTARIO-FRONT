@@ -60,7 +60,7 @@ definePage({ meta: { layout: 'blank', unauthenticatedOnly: true } })
             <!-- Header -->
             <div class="login-header">
               <img :src="logoindexcifco" alt="CIFCO Inventario" class="login-logo" />
-              <h2>CIFCO INVETARIO</h2>
+              <h2>CIFCO INVENTARIO</h2>
               <p>Accede a tu cuenta institucional</p>
             </div>
 

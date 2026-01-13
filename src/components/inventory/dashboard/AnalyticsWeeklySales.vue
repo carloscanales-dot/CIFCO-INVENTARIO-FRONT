@@ -149,14 +149,14 @@ const sales_for_month_year = async () => {
     ]
     salesReport.value = [
       {
-        title: 'Ventas - ' + year_selected.value,
-        amount: "$ " + resp.total_sales_year_current,
+        title: 'Salidas - ' + year_selected.value,
+        amount: "" + resp.total_sales_year_current,
         avatarColor: '#ACF5C9',
         avatarIcon: 'ri-money-dollar-circle-line',
       },
       {
-        title: 'Ventas - ' + (Number(year_selected.value) - 1),
-        amount: "$ " + resp.total_sales_year_before,
+        title: 'Salidas - ' + (Number(year_selected.value) - 1),
+        amount: " " + resp.total_sales_year_before,
         avatarColor: '#ACF5C9',
         avatarIcon: 'ri-money-dollar-circle-line',
       },
@@ -188,8 +188,7 @@ onMounted(() => {
       <VRow align="center">
         <VCol cols="12" md="8">
           <div class="header-text">
-            <h2>Ventas por Año</h2>
-            <span class="subtitle">Comparativa mensual de ingresos</span>
+            <h2>Salidas por Año</h2>
           </div>
         </VCol>
 

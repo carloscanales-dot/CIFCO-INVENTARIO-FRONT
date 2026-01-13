@@ -12,6 +12,8 @@
     const date_emision = ref(null);
     const type_comprobant = ref(null);
     const n_comprobant = ref(null);
+    const n_odc = ref(null)
+    const date_document = ref(null)
     const provider_id = ref(null);
     const description = ref(null);
     const importe = ref(0);
@@ -239,7 +241,7 @@
                 }, 25);
                 return;
             }
-            if(purchase_details.value == 0){
+            if(purchase_details.value.length === 0){
                 setTimeout(() => {
                     warning_purchase.value = "Es requerido añadir al menos un producto al detallado";
                 }, 25);
@@ -252,6 +254,8 @@
                 // date_emision: date_emision.value,
                 type_comprobant: type_comprobant.value,
                 n_comprobant: n_comprobant.value,
+                n_odc: n_odc.value,
+                date_document: date_document.value,
                 description:description.value,
             }
 
@@ -304,8 +308,10 @@
             warehouse_id.value = resp.purchase.warehouse_id;
             provider_id.value = resp.purchase.provider_id;
             date_emision.value = resp.purchase.date_emision;
+            date_document.value = resp.purchase.date_document
             type_comprobant.value = resp.purchase.type_comprobant;
             n_comprobant.value = resp.purchase.n_comprobant;
+            n_odc.value = resp.purchase.n_odc
             description.value = resp.purchase.description;
             purchase_details.value = resp.purchase.details;
             importe.value = resp.purchase.importe; 
@@ -408,12 +414,17 @@
                                     placeholder=""
                                 />
                             </VCol>
-                            <VCol cols="3">
-                                <VTextarea
-                                    label="Nota final"
-                                    placeholder=""
-                                    v-model="description"
-                                />
+                             <VCol cols="12" sm="6" md="3">
+                                <VTextField v-model="n_odc" label="N° ODC" />
+                            </VCol>
+
+                            <VCol cols="12" sm="6" md="3">
+                                <AppDateTimePicker v-model="date_document" label="Fecha documento de recepción"
+                                    placeholder="Seleccionar fecha" />
+                            </VCol>
+                            <!-- OBSERVACIONES -->
+                            <VCol cols="9" sm="6" md="9">
+                                <VTextarea v-model="description" label="Observaciones" rows="1" />
                             </VCol>
                             <VCol cols="12" v-if="warning_purchase">
                                 <VAlert

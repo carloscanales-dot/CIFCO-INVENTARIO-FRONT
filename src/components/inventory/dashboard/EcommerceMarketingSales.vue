@@ -142,10 +142,7 @@ onMounted(() => {
           <VRow>
             <VCol
               v-for="(stat, index) in [
-                { value: item.n_sales, label: 'N° de Ventas' },
-                { value: item.n_cotizaciones, label: 'Número de Cotizaciones' },
-                { value: `$. ${item.amount_total_payment}`, label: 'Monto Pagado' },
-                { value: `$. ${item.amount_total_not_payment}`, label: 'Monto Adeudado' }
+                { value: item.n_sales, label: 'N° de Salidas' },
               ]"
               :key="index"
               cols="12"

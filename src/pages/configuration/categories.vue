@@ -9,6 +9,10 @@
             key: 'name',
         },
         {
+            title: 'Codigo Presupuestario',
+            key: 'cod_presupuesto',
+        },
+        {
             title: 'Estado',
             key: 'state',
         },

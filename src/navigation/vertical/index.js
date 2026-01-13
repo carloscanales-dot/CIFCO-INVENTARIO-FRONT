@@ -56,6 +56,12 @@ export default [
   },
   { heading: 'productos',permissions: ['list_product','register_product','list_client','register_sale','list_sale','return'] },
   {
+    title: 'Inventario',
+    to: 'inventory-list',
+    permission: 'list_product',
+    icon: { icon: 'ri-database-2-line' },
+  },
+  {
     title: 'Productos',
     icon: { icon: 'ri-product-hunt-line' },
     children: [

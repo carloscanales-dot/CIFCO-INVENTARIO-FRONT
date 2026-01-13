@@ -54,21 +54,25 @@
     const client_company_selected_edit = ref(null);
     const client_selected_delete = ref(null);
 
-    const list = async() => {
-        try {
-            const resp = await $api("clients?page="+currentPage.value+"&search="+(searchQuery.value ? searchQuery.value : ''),{
-                method:'GET',
-                onResponseError({response}){
-                    console.log(response._data.error);
-                }
-            })
-            console.log(resp);
-            list_clients.value = resp.clients.data;
-            totalPage.value = resp.total_page;
-        } catch (error) {
-            console.log(error);
-        }
+    const list = async () => {
+      try {
+        const resp = await $api(
+          `clients?page=${currentPage.value}&search=${searchQuery.value ?? ''}`,
+          { method: 'GET' }
+        )
+
+        console.log('RESPUESTA COMPLETA:', resp)
+        console.log('CLIENTES:', resp.clients)
+
+        // 👇 AQUÍ ESTÁ LA CLAVE
+        list_clients.value = resp.clients.data
+        totalPage.value = resp.total_page
+
+      } catch (error) {
+        console.log(error)
+      }
     }
+
 
     const addNewClient = (NewClient) => {
         console.log(NewClient);

@@ -171,11 +171,11 @@ const editItem = (item) => {
   warehouse_selected.value = item;
   console.log(isEditWarehouseDialog.value,warehouse_selected.value);
 }
-const warehouseProductEdit = (warehouseProductUpdate) => {
-  let INDEX = product_warehouses.value.findIndex((item) => item.id == warehouseProductUpdate.id);
-  if(INDEX != -1){
-    product_warehouses.value[INDEX] = warehouseProductUpdate;
-  }
+const warehouseProductEdit = async (warehouseProductUpdate) => {
+  // Recargar completamente los datos del producto
+  await show();
+  // Cerrar el diálogo después de actualizar completamente
+  isEditWarehouseDialog.value = false;
 }
 const warehouseProductDelete = (warehouseProduct) => {
   let INDEX = product_warehouses.value.findIndex((item) => item.id == warehouseProduct.id);
@@ -259,11 +259,11 @@ const editProductWalllet = (product_wallet) => {
   isEditProductWalletDialog.value = true;
   product_wallet_edit_selected.value = product_wallet;
 }
-const walletProductEdit = (product_wallet_edit) => {
-  let INDEX = product_wallets.value.findIndex((item) => item.id == product_wallet_edit.id);
-  if(INDEX != -1){
-    product_wallets.value[INDEX] = product_wallet_edit;
-  }
+const walletProductEdit = async (product_wallet_edit) => {
+  // Recargar completamente los datos del producto
+  await show();
+  // Cerrar el diálogo después de actualizar completamente
+  isEditProductWalletDialog.value = false;
 }
 const deletePrice = (product_wallet) => {
   isDeleteProductWalletDialog.value = true;
@@ -581,98 +581,6 @@ definePage({ meta: { permission: 'edit_product', } });
           </VCol>
         </VRow>
 
-        <!-- 👉 Product Image -->
-        <VCard class="my-6">
-          <VCardItem>
-            <template #title>
-              Imagen del Producto
-            </template>
-          </VCardItem>
-
-          <VCardText>
-            <div class="flex">
-              <div class="w-full h-auto relative">
-                <div
-                  ref="dropZoneRef"
-                  class="cursor-pointer"
-                  @click="() => open()"
-                >
-                  <div
-                    v-if="fileData.length === 0"
-                    class="d-flex flex-column justify-center align-center gap-y-2 pa-12 border-dashed drop-zone"
-                  >
-                    <VAvatar
-                      variant="tonal"
-                      color="secondary"
-                      rounded
-                    >
-                      <VIcon icon="ri-upload-2-line" />
-                    </VAvatar>
-                    <h4 class="text-h4 text-wrap">
-                      Arrastre y suelte su imagen aquí 2.
-                    </h4>
-                    <span class="text-disabled">or</span>
-
-                    <VBtn
-                      variant="outlined"
-                      size="small"
-                    >
-                      Buscar Imagen
-                    </VBtn>
-                  </div>
-
-                  <div
-                    v-else
-                    class="d-flex justify-center align-center gap-3 pa-8 border-dashed drop-zone flex-wrap"
-                  >
-                    <VRow class="match-height w-100">
-                      <template
-                        v-for="(item, index) in fileData"
-                        :key="index"
-                      >
-                        <VCol
-                          cols="12"
-                          sm="4"
-                        >
-                          <VCard :ripple="false">
-                            <VCardText
-                              class="d-flex flex-column"
-                              @click.stop
-                            >
-                              <VImg
-                                :src="item.url"
-                                width="200px"
-                                height="150px"
-                                class="w-100 mx-auto"
-                              />
-                              <div class="mt-2" v-if="item.file">
-                                <span class="clamp-text text-wrap">
-                                  {{ item.file.name }}
-                                </span>
-                                <span>
-                                  {{ item.file.size / 1000 }} KB
-                                </span>
-                              </div>
-                            </VCardText>
-                            <VCardActions>
-                              <VBtn
-                                variant="text"
-                                block
-                                @click.stop="fileData.splice(index, 1)"
-                              >
-                                Remove
-                              </VBtn>
-                            </VCardActions>
-                          </VCard>
-                        </VCol>
-                      </template>
-                    </VRow>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </VCardText>
-        </VCard>
 
         <VCard
           title="Existencias"
@@ -1060,14 +968,14 @@ definePage({ meta: { permission: 'edit_product', } });
                 placeholder="Select"
                 label="Disponibilidad"
                 :items="[
-                  {
-                    id: 2,
-                    title: 'No Vender sin Stock'
-                  },
-                  {
-                    id: 1,
-                    title: 'Vender sin Stock'
-                  }
+                {
+                  id: 1,
+                  title: 'No hacer salida sin stock'
+                },
+                {
+                  id: 2,
+                  title: 'Hacer salida sin stock'
+                }
                 ]"
                 item-title="title"
                 item-value="id"

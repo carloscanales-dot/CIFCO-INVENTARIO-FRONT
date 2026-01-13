@@ -1,319 +1,253 @@
 <script setup>
-const router = useRouter();
-const isSaleDeleteDialogVisible = ref(false);
-const isSaleDetailShowDialogVisible = ref(false);
-const currentPage = ref(1);
-const totalPage = ref(0);
+import { ref, watch, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
+const router = useRouter()
 
-const list_sales = ref([]);
-const searchQuery = ref(null);
-const type_client = ref(null);
-const search_client = ref(null);
-const range_date = ref(null);
-const type = ref(null);
-const state_entrega = ref(null);
-const state_payment = ref(null);
-const search_product = ref(null);
+/* =====================
+   PAGINACIÓN
+===================== */
+const currentPage = ref(1)
+const totalPage = ref(0)
 
-const sale_selected_delete = ref(null);
-const sale_selected_show = ref(null);
+/* =====================
+   DATA
+===================== */
+const list_dispatches = ref([])
+
+/* =====================
+   FILTROS
+===================== */
+const search = ref(null)
+const warehouse_id = ref(null)
+const area_id = ref(null)
+const range_date = ref(null)
+
+/* =====================
+   SELECTS
+===================== */
+const warehouses = ref([])
+const areas = ref([])
+// Fallback de áreas (por id) si el backend no devuelve el listado completo
+const fallbackAreas = [
+  { id: 1, name: 'Informática' },
+  { id: 2, name: 'Recursos Humanos' },
+  { id: 3, name: 'Contabilidad' },
+  { id: 4, name: 'Administración' },
+  { id: 5, name: 'Compras' },
+  { id: 6, name: 'Logística' },
+  { id: 7, name: 'Gerencia' },
+]
+/* =====================
+   LISTAR
+===================== */
 const list = async () => {
-    try {
-        let data = {
-            search: searchQuery.value,
-            type_client: type_client.value,
-            search_client: search_client.value,
-            start_date: range_date.value ? range_date.value.split("to")[0] : '',
-            end_date: range_date.value ? range_date.value.split("to")[1] : '',
-            type: type.value,
-            state_entrega: state_entrega.value,
-            state_payment: state_payment.value,
-            search_product: search_product.value,
-        }
-        const resp = await $api("sales/index?page=" + currentPage.value, {
-            method: 'POST',
-            body: data,
-            onResponseError({ response }) {
-                console.log(response._data.error);
-            }
-        })
-        console.log(resp);
-        list_sales.value = resp.sales.data;
-        totalPage.value = resp.total_page;
-    } catch (error) {
-        console.log(error);
+  const data = {
+    search: search.value,
+    warehouse_id: warehouse_id.value,
+    area_id: area_id.value,
+    start_date: range_date.value ? range_date.value.split('to')[0] : '',
+    end_date: range_date.value ? range_date.value.split('to')[1] : '',
+  }
+
+  try {
+    const resp = await $api(`dispatches/index?page=${currentPage.value}`, {
+      method: 'POST',
+      body: data,
+    })
+
+    console.log('dispatches API response:', resp)
+
+    // Manejo tolerante al formato de respuesta
+    const possibleDispatches = resp?.dispatches ?? resp?.data ?? resp
+
+    if (Array.isArray(possibleDispatches)) {
+      list_dispatches.value = possibleDispatches
+    } else if (possibleDispatches?.data && Array.isArray(possibleDispatches.data)) {
+      list_dispatches.value = possibleDispatches.data
+    } else {
+      list_dispatches.value = []
     }
+
+    totalPage.value =
+      resp?.total_page ?? resp?.total_pages ?? resp?.totalPages ?? resp?.last_page ?? 1
+  } catch (err) {
+    console.error('Error fetching dispatches:', err)
+    list_dispatches.value = []
+    totalPage.value = 0
+  }
 }
 
-watch(currentPage, (val) => {
-    console.log(val);
-    list();
-})
 
+watch(currentPage, () => list())
+
+/* =====================
+   RESET
+===================== */
 const reset = () => {
-    searchQuery.value = '';
-    type_client.value = '';
-    search_client.value = '';
-    range_date.value = '';
-    type.value = '';
-    state_entrega.value = '';
-    state_payment.value = '';
-    search_product.value = '';
-    currentPage.value = 1;
-    list();
+  search.value = null
+  warehouse_id.value = null
+  area_id.value = null
+  range_date.value = null
+  currentPage.value = 1
+  list()
 }
 
-const downloadExcel = () => {
-    let QUERY_PARAMS = "";
-    if (searchQuery.value) {
-        QUERY_PARAMS += "&search=" + searchQuery.value;
-    }
-    if (type_client.value) {
-        QUERY_PARAMS += "&type_client=" + type_client.value;
-    }
-    if (search_client.value) {
-        QUERY_PARAMS += "&search_client=" + search_client.value;
-    }
-    if (range_date.value) {
-        QUERY_PARAMS += "&start_date=" + (range_date.value.split("to")[0]);
-        QUERY_PARAMS += "&end_date=" + (range_date.value.split("to")[1]);
-    }
-    if (type.value) {
-        QUERY_PARAMS += "&type=" + type.value;
-    }
-    if (state_entrega.value) {
-        QUERY_PARAMS += "&state_entrega=" + state_entrega.value;
-    }
-    if (state_payment.value) {
-        QUERY_PARAMS += "&state_payment=" + state_payment.value;
-    }
-    if (search_product.value) {
-        QUERY_PARAMS += "&search_product=" + search_product.value;
-    }
-    window.open(import.meta.env.VITE_API_BASE_URL + 'sales-excel?z=1' + QUERY_PARAMS, '_blank');
+/* =====================
+   CONFIG
+===================== */
+const config = async () => {
+  const resp = await $api('dispatches/config')
+  warehouses.value = resp.warehouses ?? []
+  areas.value = resp.areas ?? fallbackAreas
 }
 
-const addDeleteProduct = (Product) => {
-    console.log(Product);
-    let backup = list_sales.value;
-    list_sales.value = [];
-    let INDEX = backup.findIndex((product) => product.id == Product.id);
-    if (INDEX != -1) {
-        backup.splice(INDEX, 1);
-    }
-    setTimeout(() => {
-        list_sales.value = backup;
-    }, 50);
+/* =====================
+   ACCIONES
+===================== */
+const addDispatch = () => {
+  router.push({ name: 'dispatches-add' })
 }
 
-const editItem = (sale) => {
-    console.log(sale);
-    router.push({
-        name: 'sales-edit-id',
-        params: {
-            id: sale.id
-        }
-    });
-}
-const deleteItem = (sale) => {
-    isSaleDeleteDialogVisible.value = true;
-    sale_selected_delete.value = sale;
-}
-const saleDelete = (SALE) => {
-
-    let INDEX = list_sales.value.findIndex((sale) => sale.id == SALE.id);
-    if (INDEX != -1) {
-        list_sales.value.splice(INDEX, 1);
-    }
+const showDetail = dispatch => {
+  router.push({
+    name: 'sales-edit-id',
+    params: { id: dispatch.id },
+  })
 }
 
-const showDetails = (sale) => {
-    isSaleDetailShowDialogVisible.value = true;
-    sale_selected_show.value = sale;
-}
+// Devuelve el nombre del área: prioriza `item.area.name`, si viene solo el id busca en `areas`
+const areaLabel = item => {
+  if (!item) return '—'
+  if (item.area && typeof item.area === 'object' && item.area.name) return item.area.name
 
-const showPdf = (sale) => {
-    window.open(import.meta.env.VITE_API_BASE_URL + "sales-pdf/" + sale.id, '_blank');
+  const id = item.area && typeof item.area === 'number' ? item.area : item.area_id ?? item.area?.id
+  if (id == null) return '—'
+
+  const found = areas.value.find(a => String(a.id) === String(id))
+  return found?.name ?? '—'
 }
 
 onMounted(() => {
-    list();
+  config()
+  list()
 })
 
-
-definePage({ meta: { permission: 'list_sale', } });
+definePage({ meta: { permission: 'list_dispatch' } })
 </script>
+
 <template>
-    <div>
-        <VCard title="Ventas o Cotizaciones">
-            <VCardText>
-                <!-- FILTROS -->
-                <VRow dense>
-                    <VCol cols="12" lg="12">
-                        <VRow dense>
-                            <VCol cols="12" sm="6" md="4" lg="3">
-                                <VTextField v-model="searchQuery" density="compact" label="N° Venta / Cotización" @keyup.enter="list" />
-                            </VCol>
+  <VCard title="Salidas de Almacén">
+    <VCardText>
+      <!-- FILTROS -->
+      <VRow dense>
+        <VCol cols="12" sm="6" md="3">
+          <VTextField
+            v-model="search"
+            density="compact"
+            label="N° Salida"
+            @keyup.enter="list"
+          />
+        </VCol>
 
-                            <VCol cols="12" sm="6" md="4" lg="3">
-                                <VSelect v-model="type_client" density="compact" label="Tipo de cliente" :items="[
-                                    { id: 1, title: 'Cliente Final' },
-                                    { id: 2, title: 'Cliente Empresa' }
-                                ]" item-title="title" item-value="id" />
-                            </VCol>
+        <VCol cols="12" sm="6" md="3">
+          <VSelect
+            v-model="warehouse_id"
+            density="compact"
+            label="Almacén"
+            :items="warehouses"
+            item-title="name"
+            item-value="id"
+            clearable
+          />
+        </VCol>
 
-                            <VCol cols="12" sm="6" md="4" lg="3">
-                                <VTextField v-model="search_client" density="compact" label="Cliente" placeholder="Buscar cliente"
-                                    @keyup.enter="list" />
-                            </VCol>
+        <VCol cols="12" sm="6" md="3">
+          <VSelect
+            v-model="area_id"
+            density="compact"
+            label="Área"
+            :items="areas"
+            item-title="name"
+            item-value="id"
+            clearable
+          />
+        </VCol>
 
-                            <VCol cols="12" sm="6" md="4" lg="3">
-                                <AppDateTimePicker v-model="range_date" density="compact" label="Rango de fecha"
-                                    :config="{ mode: 'range' }" />
-                            </VCol>
+        <VCol cols="12" sm="6" md="3">
+          <AppDateTimePicker
+            v-model="range_date"
+            density="compact"
+            label="Rango de fecha"
+            :config="{ mode: 'range' }"
+          />
+        </VCol>
 
-                            <VCol cols="12" sm="6" md="4" lg="2">
-                                <VSelect v-model="type" density="compact" label="Tipo" :items="[
-                                    { id: 1, title: 'Venta' },
-                                    { id: 2, title: 'Cotización' }
-                                ]" item-title="title" item-value="id" />
-                            </VCol>
+        <VCol cols="12" sm="6" md="3">
+          <VBtn block color="primary" @click="addDispatch">
+            Nueva salida
+            <VIcon end icon="ri-add-line" />
+          </VBtn>
+        </VCol>
 
-                            <VCol cols="12" sm="6" md="4" lg="3">
-                                <VSelect v-model="state_entrega" density="compact" label="Estado de entrega" :items="[
-                                    { id: 1, title: 'Pendiente' },
-                                    { id: 2, title: 'Parcial' },
-                                    { id: 3, title: 'Completo' }
-                                ]" item-title="title" item-value="id" />
-                            </VCol>
+        <VCol cols="12" sm="6" md="3">
+          <VBtn block color="info" prepend-icon="ri-search-line" @click="list">
+            Buscar
+          </VBtn>
+        </VCol>
 
-                            <VCol cols="12" sm="6" md="4" lg="3">
-                                <VSelect v-model="state_payment" density="compact" label="Estado de pago" :items="[
-                                    { id: 1, title: 'Pendiente' },
-                                    { id: 2, title: 'Parcial' },
-                                    { id: 3, title: 'Completo' }
-                                ]" item-title="title" item-value="id" />
-                            </VCol>
+        <VCol cols="12" sm="6" md="3">
+          <VBtn block color="secondary" prepend-icon="ri-restart-line" @click="reset">
+            Limpiar
+          </VBtn>
+        </VCol>
+      </VRow>
+    </VCardText>
 
-                            <VCol cols="12" sm="6" md="4" lg="4">
-                                <VTextField v-model="search_product" density="compact" label="Producto" placeholder="Buscar producto"
-                                    @keyup.enter="list" />
-                            </VCol>
-                            <VCol cols="12" sm="6" md="3" lg="3" v-if="isPermission('register_sale')">
-                                <VBtn block color="primary" @click="router.push({ name: 'sales-add' })">
-                                    Nueva venta
-                                    <VIcon end icon="ri-shopping-cart-2-line" />
-                                </VBtn>
-                            </VCol>
+    <!-- TABLA -->
+    <div class="table-responsive">
+      <VTable density="comfortable">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Solicitante</th>
+            <th>Almacén</th>
+            <th>Área</th>
+            <th>Usuario</th>
+            <th>Fecha</th>
+            <th>Estado</th>
+            <th class="text-center">Acciones</th>
+          </tr>
+        </thead>
 
-                            <VCol cols="12" sm="6" md="3" lg="3">
-                                <VBtn block color="info" prepend-icon="ri-search-2-line" @click="list">
-                                    Buscar
-                                </VBtn>
-                            </VCol>
-
-                            <VCol cols="12" sm="6" md="3" lg="3">
-                                <VBtn block color="secondary" prepend-icon="ri-restart-line" @click="reset">
-                                    Limpiar
-                                </VBtn>
-                            </VCol>
-
-                            <VCol cols="12" sm="6" md="3" lg="3">
-                                <VBtn block color="success" prepend-icon="ri-file-excel-2-line" @click="downloadExcel">
-                                    Exportar
-                                </VBtn>
-                            </VCol>
-                        </VRow>
-                    </VCol>
-
-                    <!-- ACCIONES -->
-                    <VCol cols="12" lg="3">
-                        <VRow dense>
-
-                        </VRow>
-                    </VCol>
-                </VRow>
-            </VCardText>
-
-            <!-- TABLA -->
-            <div class="table-responsive">
-                <VTable density="comfortable">
-                    <thead>
-                        <tr>
-                            <th>N°</th>
-                            <th>Cliente</th>
-                            <th>Tipo cliente</th>
-                            <th>Asesor</th>
-                            <th>Total</th>
-                            <th>Pagado</th>
-                            <th>Tipo</th>
-                            <th>Estado pago</th>
-                            <th>Estado entrega</th>
-                            <th>Registro</th>
-                            <th class="text-center">Acción</th>
-                        </tr>
-                    </thead>
-
-                    <tbody>
-                        <tr v-for="item in list_sales" :key="item.id" style="font-size: smaller">
-                            <td>{{ item.id }}</td>
-                            <td>{{ item.client.full_name }}</td>
-                            <td>{{ item.type_client == 1 ? 'CLIENTE FINAL' : 'CLIENTE EMPRESA' }}</td>
-                            <td>{{ item.user.full_name }}</td>
-                            <td>$. {{ item.total }}</td>
-                            <td>$. {{ item.debt }}</td>
-                            <td>{{ item.state_sale == 1 ? 'VENTA' : 'COTIZACIÓN' }}</td>
-                            <td>
-                                <VChip size="small"
-                                    :color="item.state_payment == 1 ? 'error' : item.state_payment == 2 ? 'warning' : 'primary'">
-                                    {{ item.state_payment == 1 ? 'Pendiente' : item.state_payment == 2 ? 'Parcial' :
-                                        'Completo' }}
-                                </VChip>
-                            </td>
-                            <td>
-                                <VChip size="small"
-                                    :color="item.state_entrega == 1 ? 'warning' : item.state_entrega == 2 ? 'secondary' : 'info'">
-                                    {{ item.state_entrega == 1 ? 'Pendiente' : item.state_entrega == 2 ? 'Parcial' :
-                                        'Completo' }}
-                                </VChip>
-                            </td>
-                            <td>{{ item.created_at }}</td>
-                            <td class="text-center">
-                                <div class="d-flex justify-center gap-1">
-                                    <IconBtn size="small" @click="showPdf(item)">
-                                        <VIcon icon="ri-file-pdf-2-line" />
-                                    </IconBtn>
-
-                                    <IconBtn size="small" @click="showDetails(item)">
-                                        <VIcon icon="ri-file-list-2-line" />
-                                    </IconBtn>
-
-                                    <IconBtn size="small" v-if="isPermission('edit_sale')" @click="editItem(item)">
-                                        <VIcon icon="ri-pencil-line" />
-                                    </IconBtn>
-
-                                    <IconBtn size="small" v-if="isPermission('delete_sale')" @click="deleteItem(item)">
-                                        <VIcon icon="ri-delete-bin-line" />
-                                    </IconBtn>
-                                </div>
-                            </td>
-                        </tr>
-                    </tbody>
-                </VTable>
-            </div>
-
-            <!-- PAGINACIÓN -->
-            <VCardActions class="justify-center justify-lg-end">
-                <VPagination v-model="currentPage" :length="totalPage" />
-            </VCardActions>
-        </VCard>
-
-        <!-- DIALOGS -->
-        <SaleDeleteDialog v-if="sale_selected_delete && isSaleDeleteDialogVisible"
-            v-model:isDialogVisible="isSaleDeleteDialogVisible" :saleSelected="sale_selected_delete"
-            @deleteSale="saleDelete" />
-
-        <SaleDetailShowDialog v-if="sale_selected_show && isSaleDetailShowDialogVisible"
-            v-model:isDialogVisible="isSaleDetailShowDialogVisible" :saleSelected="sale_selected_show" />
+        <tbody>
+          <tr v-for="item in list_dispatches" :key="item.id">
+            <td>{{ item.id }}</td>
+            <td>{{ item.requester?.full_name ?? '—' }}</td>
+            <td>{{ item.warehouse.name }}</td>
+            <td>{{ areaLabel(item) }}</td>
+            <td>{{ item.user?.full_name ?? '—' }}</td>
+            <td>{{ item.date_emision }}</td>
+            <td>
+              <VChip
+                size="small"
+                :color="item.state == 1 ? 'success' : 'error'"
+              >
+                {{ item.state == 1 ? 'Activo' : 'Anulado' }}
+              </VChip>
+            </td>
+            <td class="text-center">
+              <IconBtn size="small" @click="showDetail(item)">
+                <VIcon icon="ri-eye-line" />
+              </IconBtn>
+            </td>
+          </tr>
+        </tbody>
+      </VTable>
     </div>
+
+    <!-- PAGINACIÓN -->
+    <VCardActions class="justify-center justify-lg-end">
+      <VPagination v-model="currentPage" :length="totalPage" />
+    </VCardActions>
+  </VCard>
 </template>

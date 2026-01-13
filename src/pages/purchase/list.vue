@@ -131,7 +131,7 @@ definePage({ meta: { permission: 'list_purchase', } });
 </script>
 
 <template>
-    <VCard title="Gestión de Compras">
+    <VCard title="Gestión de Entradas">
         <VCardText>
             <!-- FILTROS -->
             <VRow dense>
@@ -202,7 +202,7 @@ definePage({ meta: { permission: 'list_purchase', } });
                                 <VRow dense>
                                     <VCol cols="12" v-if="isPermission('register_purchase')">
                                         <VBtn block color="primary" @click="router.push({ name: 'purchase-add' })">
-                                            Nueva compra
+                                            Nueva entrada
                                             <VIcon end icon="ri-shopping-cart-2-line" />
                                         </VBtn>
                                     </VCol>

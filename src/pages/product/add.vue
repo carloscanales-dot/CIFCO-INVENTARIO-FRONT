@@ -690,11 +690,11 @@ definePage({ meta: { permission: 'register_product', } });
               <VSelect placeholder="Select" label="Disponibilidad" :items="[
                 {
                   id: 1,
-                  title: 'No Vender sin Stock'
+                  title: 'No hacer salida sin stock'
                 },
                 {
                   id: 2,
-                  title: 'Vender sin Stock'
+                  title: 'Hacer salida sin stock'
                 }
               ]" item-title="title" item-value="id" v-model="product.disponibilidad">
               </VSelect>

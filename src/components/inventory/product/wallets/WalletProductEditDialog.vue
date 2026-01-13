@@ -86,12 +86,8 @@ const update = async() => {
     }else{
       success.value = "El precio se ha editado correctamente";
       emit("editWalletProduct",resp.product_wallet);
-    //   name.value = '';
-    //   description.value = '';
       warning.value = null;
       error_exits.value = null;
-    //   success.value = null;
-    //   onFormReset();
     }
   } catch (error) {
     console.log(error);

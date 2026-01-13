@@ -15,6 +15,7 @@ const name = ref(null);
 const FILE_IMAGEN = ref(null);
 const PREVIZUALIZA_IMAGEN = ref(null);
 const warning = ref(null);
+const cod_presupuesto = ref(null);
 const error_exits = ref(null);
 const success = ref(null);
 
@@ -38,6 +39,7 @@ const store = async() => {
   let formData = new FormData();
   formData.append("title",name.value);
   formData.append("image",FILE_IMAGEN.value);
+  formData.append("cod_presupuesto",cod_presupuesto.value || '');
   formData.append("state",1);
   try {
     const resp = await $api("categories",{
@@ -54,6 +56,7 @@ const store = async() => {
       success.value = "La categoria se ha registrado correctamente";
       emit("addCategorie",resp.categorie);
       name.value = '';
+      cod_presupuesto.value = '';
       FILE_IMAGEN.value = '';
       PREVIZUALIZA_IMAGEN.value = '';
       warning.value = null;
@@ -127,6 +130,15 @@ const dialogVisibleUpdate = val => {
                 v-model="name"
                 label="Nombre"
                 placeholder="Example: Admin"
+              />
+            </VCol>
+            <VCol
+              cols="12"
+            >
+              <VTextField
+                v-model="cod_presupuesto"
+                label="Código Presupuestario"
+                placeholder="Ingrese el código presupuestario"
               />
             </VCol>
             <VCol

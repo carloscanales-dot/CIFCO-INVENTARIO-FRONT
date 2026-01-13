@@ -8,6 +8,8 @@ const type_comprobant = ref(null);
 const n_comprobant = ref(null);
 const provider_id = ref(null);
 const description = ref(null);
+const n_odc = ref(null);              // Número ODC
+const date_document = ref(null);      // Fecha del documento
 const importe = ref(0);
 const igv = ref(0);
 const total = ref(0);
@@ -161,7 +163,7 @@ const store = async () => {
             }, 25);
             return;
         }
-        if (purchase_details.value == 0) {
+        if (purchase_details.value.length === 0) {
             setTimeout(() => {
                 warning_purchase.value = "Es requerido añadir al menos un producto al detallado";
             }, 25);
@@ -172,6 +174,8 @@ const store = async () => {
             warehouse_id: warehouse_id.value,
             provider_id: provider_id.value,
             date_emision: date_emision.value,
+            date_document: date_document.value,
+            n_odc: n_odc.value,
             type_comprobant: type_comprobant.value,
             n_comprobant: n_comprobant.value,
             purchase_details: purchase_details.value,
@@ -195,7 +199,11 @@ const store = async () => {
             provider_id.value = '';
             type_comprobant.value = '';
             n_comprobant.value = '';
+            n_odc.value = '';
             description.value = '';
+
+            date_emision.value = null;
+            date_document.value = null;
 
             purchase_details.value = [];
             total.value = 0;
@@ -287,11 +295,11 @@ definePage({ meta: { permission: 'register_purchase', } });
                             </VCol>
 
                             <VCol cols="12" sm="6" md="3">
-                                <VTextField v-model="n_comprobant" label="N° ODC" />
+                                <VTextField v-model="n_odc" label="N° ODC" />
                             </VCol>
 
                             <VCol cols="12" sm="6" md="3">
-                                <AppDateTimePicker v-model="date_emision" label="Fecha documento de recepción"
+                                <AppDateTimePicker v-model="date_document" label="Fecha documento de recepción"
                                     placeholder="Seleccionar fecha" />
                             </VCol>
 

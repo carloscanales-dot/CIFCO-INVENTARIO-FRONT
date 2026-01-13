@@ -12,6 +12,11 @@ const props = defineProps({
     type: null,
     required: false,
   },
+  disabled: {
+    type: Boolean,
+    required: false,
+    default: false,
+  },
 })
 
 const emit = defineEmits(['update:selectedRadio'])
@@ -26,6 +31,7 @@ const updateSelectedOption = value => {
   <VRadioGroup
     v-if="props.radioContent"
     :model-value="props.selectedRadio"
+    :disabled="props.disabled"
     @update:model-value="updateSelectedOption"
   >
     <VRow>
@@ -36,7 +42,10 @@ const updateSelectedOption = value => {
       >
         <VLabel
           class="custom-input custom-radio-icon rounded-xl cursor-pointer"
-          :class="props.selectedRadio === item.value ? 'active' : ''"
+          :class="[
+            props.selectedRadio === item.value ? 'active' : '',
+            props.disabled ? 'opacity-50 pointer-events-none' : '',
+          ]"
         >
           <slot :item="item">
             <div class="d-flex flex-column align-center text-center gap-2">

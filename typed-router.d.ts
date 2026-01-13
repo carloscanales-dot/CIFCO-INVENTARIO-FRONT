@@ -28,6 +28,7 @@ declare module 'vue-router/auto-routes' {
     'configuration-warehouses': RouteRecordInfo<'configuration-warehouses', '/configuration/warehouses', Record<never, never>, Record<never, never>>,
     'conversion-list': RouteRecordInfo<'conversion-list', '/conversion/list', Record<never, never>, Record<never, never>>,
     'dashboard': RouteRecordInfo<'dashboard', '/dashboard', Record<never, never>, Record<never, never>>,
+    'inventory-list': RouteRecordInfo<'inventory-list', '/inventory/list', Record<never, never>, Record<never, never>>,
     'kardex': RouteRecordInfo<'kardex', '/kardex', Record<never, never>, Record<never, never>>,
     'landing': RouteRecordInfo<'landing', '/landing', Record<never, never>, Record<never, never>>,
     'login': RouteRecordInfo<'login', '/login', Record<never, never>, Record<never, never>>,
