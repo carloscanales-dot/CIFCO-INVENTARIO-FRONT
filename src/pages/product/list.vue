@@ -47,14 +47,14 @@
                             </VCol>
 
                             <VCol cols="12" md="3">
-                                <VBtn block color="success" prepend-icon="ri-file-excel-2-line" @click="downloadExcel">
+                                <VBtn block color="success" prepend-icon="ri-file-excel-2-line" @click="downloadExcel" disabled>
                                     Exportar
                                 </VBtn>
                             </VCol>
 
                             <VCol cols="12" md="3">
                                 <VBtn block color="success" prepend-icon="ri-file-excel-line"
-                                    @click="isImportExcelProductDialogVisible = !isImportExcelProductDialogVisible">
+                                    @click="isImportExcelProductDialogVisible = !isImportExcelProductDialogVisible" disabled>
                                     Importar
                                 </VBtn>
                             </VCol>

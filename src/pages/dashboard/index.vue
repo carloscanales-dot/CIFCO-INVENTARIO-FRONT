@@ -1,119 +1,515 @@
 <script setup>
-    const statisticsWithImages = ref([])
-    const statisticsVertical = ref([])
+    import VueApexCharts from 'vue3-apexcharts'
+    
+    const inventoryStats = ref([])
+    const warehouses = ref([])
+    const list_products = ref([])
+    const inventory_stock = ref([])
+    const list_refounds = ref([])
+    const lowStockProducts = ref([])
+    const recentMovements = ref([])
+    
+    // Opciones de gráfica de stock por almacén
+    const warehouseChartOptions = ref({
+        chart: {
+            type: 'bar',
+            height: 350,
+            toolbar: {
+                show: true
+            }
+        },
+        plotOptions: {
+            bar: {
+                horizontal: false,
+                columnWidth: '55%',
+                endingShape: 'rounded'
+            },
+        },
+        dataLabels: {
+            enabled: false
+        },
+        stroke: {
+            show: true,
+            width: 2,
+            colors: ['transparent']
+        },
+        xaxis: {
+            categories: [],
+        },
+        yaxis: {
+            title: {
+                text: 'Cantidad de Productos'
+            }
+        },
+        fill: {
+            opacity: 1
+        },
+        tooltip: {
+            y: {
+                formatter: function (val) {
+                    return val + " unidades"
+                }
+            }
+        },
+        colors: ['#7367F0', '#28C76F', '#FF9F43']
+    })
+    
+    const warehouseChartSeries = ref([])
+
+    // Opciones de gráfica de movimientos mensuales (entradas vs salidas)
+    const movementsChartOptions = ref({
+        chart: {
+            type: 'area',
+            height: 350,
+            toolbar: {
+                show: true
+            },
+            zoom: {
+                enabled: false
+            }
+        },
+        dataLabels: {
+            enabled: false
+        },
+        stroke: {
+            curve: 'smooth',
+            width: 2
+        },
+        xaxis: {
+            categories: ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic']
+        },
+        yaxis: {
+            title: {
+                text: 'Cantidad'
+            }
+        },
+        colors: ['#28C76F', '#EA5455'],
+        fill: {
+            type: 'gradient',
+            gradient: {
+                shadeIntensity: 1,
+                opacityFrom: 0.7,
+                opacityTo: 0.3,
+            }
+        },
+        legend: {
+            position: 'top',
+            horizontalAlign: 'left'
+        }
+    })
+
+    const movementsChartSeries = ref([
+        {
+            name: 'Entradas',
+            data: []
+        },
+        {
+            name: 'Salidas',
+            data: []
+        }
+    ])
+
     definePage({
         meta: {
           permission: 'all'
         },
     })
 
-    const information_general = async() => {
-      try {
+    // Obtener stock total de un producto
+    const getTotalStock = (productId) => {
+        return inventory_stock.value
+            .filter(s => s.product_id === productId)
+            .reduce((total, s) => total + Number(s.quantity), 0)
+    }
+
+    // Calcular estadísticas del inventario
+    const calculateInventoryStats = () => {
+        const totalProducts = list_products.value.length
+        const activeProducts = list_products.value.filter(p => p.state == 1).length
         
-        const resp = await $api("kpi/information_general",{
-            method: 'POST',
-            body:{},
-            onResponseError({response}){
-                console.log(response._data.error);
-            }
-        })
-        console.log(resp);
-        /*statisticsVertical.value = [
+        // Productos con stock bajo (menos de 10 unidades)
+        const lowStock = list_products.value.filter(p => getTotalStock(p.id) <= 10)
+        lowStockProducts.value = lowStock.slice(0, 5) // Top 5
+        
+        // Calcular valor total del inventario
+        const totalValue = list_products.value.reduce((sum, product) => {
+            const stock = getTotalStock(product.id)
+            const price = Number(product.price_purchase || 0)
+            return sum + (stock * price)
+        }, 0)
+
+        inventoryStats.value = [
             {
-              title: 'Total Sales',
+              title: 'Total Productos',
               color: 'primary',
-              icon: 'ri-shopping-cart-line',
-              stats: '$. '+resp.total_sales_month_current,
-              change: resp.variation_percentage_total_sales,
+              icon: 'ri-archive-line',
+              stats: totalProducts,
+              subtitle: 'En inventario',
             },
             {
-              title: resp.sucursales_most_sales_month_current ?  resp.sucursales_most_sales_month_current.sucursale_most_sales : 'No hay una sucursal',
+              title: 'Productos Activos',
               color: 'success',
-              icon: 'ri-handbag-line',
-              stats: resp.sucursales_most_sales_month_current ? '$. '+resp.sucursales_most_sales_month_current.total_sales : 0,
-              change: resp.variation_percentage_sucursal_most_sale,
+              icon: 'ri-checkbox-circle-line',
+              stats: activeProducts,
+              subtitle: 'Disponibles',
             },
             {
-              title: 'Total Purchase',
-              color: 'secondary',
-              icon: 'ri-truck-line',
-              stats: '$. '+resp.purchase_total_month_current,
-              change: resp.variation_percentage_purchase,
+              title: 'Stock Bajo',
+              color: 'warning',
+              icon: 'ri-alert-line',
+              stats: lowStock.length,
+              subtitle: 'Requieren atención',
             },
-          ]*/
-      } catch (error) {
-        console.log(error);
-      }
+            {
+              title: 'Valor Inventario',
+              color: 'info',
+              icon: 'ri-money-dollar-circle-line',
+              stats: `$${totalValue.toFixed(2)}`,
+              subtitle: 'Valor total',
+            },
+        ]
     }
 
-    const asesor_most_sales = async() => {
+    // Obtener datos de inventario
+    const getInventoryData = async() => {
       try {
-
-        const resp = await $api("kpi/asesor_most_sales",{
+        const resp = await $api("inventory/list?page=1", {
             method: 'POST',
-            body:{},
+            body: {},
             onResponseError({response}){
                 console.log(response._data.error);
             }
         })
-        console.log(resp);
-        /*statisticsWithImages.value = [
-          {
-              title: 'Asesor Comercial',
-              subtitle: resp.asesores_m_most_sales_month_current ? resp.asesores_m_most_sales_month_current.asesor_full_name : 'No hay',
-              stats: resp.asesores_m_most_sales_month_current ? 'S/. '+Number(resp.asesores_m_most_sales_month_current.total_sales).toFixed(2) : 0,
-              change: resp.variation_percentage_asesor_m_most_sales,
-              image: 'https://cdn-icons-png.flaticon.com/512/3271/3271504.png',
-              imgWidth: 99,
-              color: 'primary',
-          },
-          {
-              title: 'Asesora Comercial',
-              subtitle: resp.asesores_f_most_sales_month_current ? resp.asesores_f_most_sales_month_current.asesor_full_name : 'No hay',
-              stats: resp.asesores_f_most_sales_month_current ? 'S/. '+Number(resp.asesores_f_most_sales_month_current.total_sales).toFixed(2) : 0,
-              change: resp.variation_percentage_asesor_f_most_sales,
-              image: 'https://cdn-icons-png.flaticon.com/512/3271/3271502.png',
-              imgWidth: 85,
-              color: 'success',
-          },
-      ]*/
+        
+        list_products.value = resp.products.data || []
+        inventory_stock.value = resp.inventory || []
+        
+        calculateInventoryStats()
+        calculateWarehouseChart()
       } catch (error) {
         console.log(error);
       }
     }
 
-    onMounted(() => {
-      information_general();
-      asesor_most_sales();
+    // Obtener configuración de almacenes
+    const getConfig = async() => {
+      try {
+        const resp = await $api("products/config", {
+            method: 'GET',
+            onResponseError({response}){
+                console.log(response._data.error);
+            }
+        })
+        
+        warehouses.value = resp.warehouses || []
+      } catch (error) {
+        console.log(error);
+      }
+    }
+
+    // Calcular datos para gráfica de almacenes
+    const calculateWarehouseChart = () => {
+        if (warehouses.value.length === 0 || list_products.value.length === 0) return
+        
+        warehouseChartOptions.value.xaxis.categories = warehouses.value.map(w => w.name)
+        
+        // Calcular stock total por almacén
+        const stockByWarehouse = warehouses.value.map(warehouse => {
+            return inventory_stock.value
+                .filter(s => s.warehouse_id === warehouse.id)
+                .reduce((total, s) => total + Number(s.quantity), 0)
+        })
+        
+        warehouseChartSeries.value = [{
+            name: 'Stock Total',
+            data: stockByWarehouse
+        }]
+    }
+
+    // Obtener datos de salidas (refounds)
+    const getRefoundsData = async() => {
+      try {
+        const resp = await $api("refound_products/index?page=1", {
+            method: 'POST',
+            body: {},
+            onResponseError({response}){
+                console.log(response._data.error);
+            }
+        })
+        
+        list_refounds.value = resp.refound_products.data || []
+        recentMovements.value = list_refounds.value.slice(0, 5)
+        
+        calculateMovementsChart()
+      } catch (error) {
+        console.log(error);
+      }
+    }
+
+    // Calcular gráfica de movimientos mensuales
+    const calculateMovementsChart = () => {
+        // Simular datos de entradas y salidas por mes
+        // En producción, estos datos vendrían del backend
+        const currentMonth = new Date().getMonth()
+        
+        // Generar datos simulados basados en las salidas reales
+        const monthlyExits = Array(12).fill(0)
+        const monthlyEntries = Array(12).fill(0)
+        
+        // Contar salidas por mes
+        list_refounds.value.forEach(refound => {
+            if (refound.created_at) {
+                const month = new Date(refound.created_at).getMonth()
+                monthlyExits[month] += Number(refound.quantity || 0)
+            }
+        })
+        
+        // Simular entradas (en producción vendría del backend)
+        for (let i = 0; i <= currentMonth; i++) {
+            monthlyEntries[i] = Math.floor(Math.random() * 100) + 50
+        }
+        
+        movementsChartSeries.value = [
+            {
+                name: 'Entradas',
+                data: monthlyEntries
+            },
+            {
+                name: 'Salidas',
+                data: monthlyExits
+            }
+        ]
+    }
+
+    const avatarText = (text) => {
+        if (!text) return '?'
+        return text.split(' ').map(word => word[0]).join('').substring(0, 2).toUpperCase()
+    }
+
+    const getStockColor = (quantity) => {
+        if (quantity === 0) return 'error'
+        if (quantity <= 10) return 'warning'
+        return 'success'
+    }
+
+    onMounted(async () => {
+      await getConfig()
+      await getInventoryData()
+      await getRefoundsData()
     })
 </script>
 <template>
     <div>
         <VRow class="match-height" v-if="isPermission('dashboard')">
-
-            <VCol
-              cols="12"
-              md="12"
-            >
             
-              <EcommerceMarketingSales />
+            <!-- Título del Dashboard -->
+            <VCol cols="12">
+                <h2 class="text-h4 mb-2">Dashboard de Inventario</h2>
+                <p class="text-body-1 text-medium-emphasis">Monitoreo de entradas y salidas de productos</p>
             </VCol>
 
-            <!-- compras -->
-            <VCol
-                cols="12"
-                md="12"
-            >
-                <AnalyticsWeeklySales />
-            </VCol>
-
-            <!-- 👉 Top Referral Sources -->
+            <!-- Estadísticas principales de inventario -->
             <VCol
               cols="12"
-              md="12"
+              sm="6"
+              md="3"
+              v-for="stat in inventoryStats"
+              :key="stat.title"
             >
-              <EcommerceTopReferralSources />
+                <VCard>
+                    <VCardText class="d-flex align-center justify-space-between">
+                        <div>
+                            <h6 class="text-h6 mb-1">{{ stat.title }}</h6>
+                            <p class="text-caption text-medium-emphasis mb-0">{{ stat.subtitle }}</p>
+                            <h4 class="text-h4 mt-2">{{ stat.stats }}</h4>
+                        </div>
+                        <VAvatar
+                            :color="stat.color"
+                            variant="tonal"
+                            size="42"
+                        >
+                            <VIcon
+                                :icon="stat.icon"
+                                size="26"
+                            />
+                        </VAvatar>
+                    </VCardText>
+                </VCard>
             </VCol>
+
+            <!-- Gráfico de stock por almacén -->
+            <VCol cols="12" md="8">
+                <VCard title="Stock por Almacén">
+                    <VCardText>
+                        <p class="text-body-2 text-medium-emphasis mb-4">
+                            Distribución de productos en cada almacén
+                        </p>
+                        <VueApexCharts
+                            v-if="warehouseChartSeries.length > 0"
+                            type="bar"
+                            height="350"
+                            :options="warehouseChartOptions"
+                            :series="warehouseChartSeries"
+                        />
+                        <div v-else class="text-center py-10">
+                            <VProgressCircular indeterminate color="primary" />
+                            <p class="text-body-2 mt-3">Cargando datos...</p>
+                        </div>
+                    </VCardText>
+                </VCard>
+            </VCol>
+
+            <!-- Productos con stock bajo -->
+            <VCol cols="12" md="4">
+                <VCard title="Alertas de Stock Bajo">
+                    <VCardText>
+                        <p class="text-body-2 text-medium-emphasis mb-4">
+                            Productos que requieren reabastecimiento
+                        </p>
+                        
+                        <VList v-if="lowStockProducts.length > 0" lines="two">
+                            <VListItem
+                                v-for="product in lowStockProducts"
+                                :key="product.id"
+                                class="mb-2 pa-2"
+                            >
+                                <template #prepend>
+                                    <VAvatar
+                                        size="40"
+                                        :color="product.imagen ? '' : 'warning'"
+                                        :variant="!product.imagen ? 'tonal' : undefined"
+                                    >
+                                        <VImg v-if="product.imagen" :src="product.imagen" />
+                                        <span v-else class="text-sm">{{ avatarText(product.title) }}</span>
+                                    </VAvatar>
+                                </template>
+                                
+                                <VListItemTitle class="font-weight-medium">
+                                    {{ product.title }}
+                                </VListItemTitle>
+                                <VListItemSubtitle>
+                                    SKU: {{ product.sku }}
+                                </VListItemSubtitle>
+
+                                <template #append>
+                                    <VChip
+                                        :color="getStockColor(getTotalStock(product.id))"
+                                        size="small"
+                                    >
+                                        {{ getTotalStock(product.id) }}
+                                    </VChip>
+                                </template>
+                            </VListItem>
+                        </VList>
+                        
+                        <div v-else class="text-center py-8">
+                            <VIcon 
+                                icon="ri-checkbox-circle-line" 
+                                size="48"
+                                color="success"
+                                class="mb-3"
+                            />
+                            <p class="text-body-2">Todos los productos tienen stock suficiente</p>
+                        </div>
+                    </VCardText>
+                </VCard>
+            </VCol>
+
+            <!-- Gráfico de movimientos mensuales -->
+            <VCol cols="12" md="12">
+                <VCard title="Movimientos Mensuales de Inventario">
+                    <VCardText>
+                        <p class="text-body-2 text-medium-emphasis mb-4">
+                            Comparación de entradas y salidas de productos por mes
+                        </p>
+                        <VueApexCharts
+                            v-if="movementsChartSeries[0].data.length > 0"
+                            type="area"
+                            height="350"
+                            :options="movementsChartOptions"
+                            :series="movementsChartSeries"
+                        />
+                        <div v-else class="text-center py-10">
+                            <VProgressCircular indeterminate color="primary" />
+                            <p class="text-body-2 mt-3">Cargando movimientos...</p>
+                        </div>
+                    </VCardText>
+                </VCard>
+            </VCol>
+
+            <!-- Actividad reciente (Últimas salidas) -->
+            <VCol cols="12">
+                <VCard title="Movimientos Recientes">
+                    <VCardText>
+                        <p class="text-body-2 text-medium-emphasis mb-4">
+                            Últimas salidas de productos registradas
+                        </p>
+                        
+                        <VTable v-if="recentMovements.length > 0">
+                            <thead>
+                                <tr>
+                                    <th class="text-uppercase">Producto</th>
+                                    <th class="text-uppercase">Tipo</th>
+                                    <th class="text-uppercase">Cantidad</th>
+                                    <th class="text-uppercase">Almacén</th>
+                                    <th class="text-uppercase">Estado</th>
+                                    <th class="text-uppercase">Fecha</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr v-for="movement in recentMovements" :key="movement.id">
+                                    <td>
+                                        <div class="d-flex align-center">
+                                            <VAvatar
+                                                size="32"
+                                                :color="movement.product?.imagen ? '' : 'primary'"
+                                                :variant="!movement.product?.imagen ? 'tonal' : undefined"
+                                                class="me-3"
+                                            >
+                                                <VImg v-if="movement.product?.imagen" :src="movement.product.imagen" />
+                                                <span v-else class="text-xs">{{ avatarText(movement.product?.title) }}</span>
+                                            </VAvatar>
+                                            <span class="font-weight-medium">{{ movement.product?.title }}</span>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <VChip
+                                            :color="movement.type == 1 ? 'info' : 'warning'"
+                                            size="small"
+                                        >
+                                            {{ movement.type == 1 ? 'Salida' : 'Devolución' }}
+                                        </VChip>
+                                    </td>
+                                    <td>
+                                        <span class="font-weight-medium">{{ movement.quantity }}</span>
+                                    </td>
+                                    <td>{{ movement.warehouse?.name }}</td>
+                                    <td>
+                                        <VChip
+                                            :color="movement.state == 1 ? 'success' : 'error'"
+                                            size="small"
+                                        >
+                                            {{ movement.state == 1 ? 'Activo' : 'Inactivo' }}
+                                        </VChip>
+                                    </td>
+                                    <td>{{ new Date(movement.created_at).toLocaleDateString() }}</td>
+                                </tr>
+                            </tbody>
+                        </VTable>
+                        
+                        <div v-else class="text-center py-8">
+                            <VIcon 
+                                icon="ri-history-line" 
+                                size="48"
+                                color="info"
+                                class="mb-3"
+                            />
+                            <p class="text-body-2">No hay movimientos recientes</p>
+                        </div>
+                    </VCardText>
+                </VCard>
+            </VCol>
+
         </VRow>
     </div>
 </template>

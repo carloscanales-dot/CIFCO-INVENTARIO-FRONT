@@ -40,7 +40,7 @@
                             </VCol>
 
                             <VCol cols="12" md="4">
-                                <VBtn block color="success" prepend-icon="ri-file-excel-2-line" @click="downloadExcel">
+                                <VBtn block color="success" prepend-icon="ri-file-excel-2-line" @click="downloadExcel" disabled>
                                     Exportar
                                 </VBtn>
                             </VCol>

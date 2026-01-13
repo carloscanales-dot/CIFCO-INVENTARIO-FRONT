@@ -134,7 +134,7 @@ const update = async() => {
       error_exits.value = resp.message_text;
     } else {
       success.value = "El usuario se ha editado correctamente";
-      emit("editSucursal", resp.sucursal);
+      emit("editUser", resp.user);
       warning.value = null;
       error_exits.value = null;
 

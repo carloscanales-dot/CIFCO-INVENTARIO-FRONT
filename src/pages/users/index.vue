@@ -91,15 +91,8 @@
 
     const addEditUser = (editUser) => {
         console.log(editUser);
-        let backup = list_users.value;
-        list_users.value = [];
-        let INDEX = backup.findIndex((user) => user.id == editUser.id);
-        if(INDEX != -1){
-            backup[INDEX] = editUser;
-        }
-        setTimeout(() => {
-            list_users.value = backup;
-        }, 50);
+        // Recargar la lista completa desde el servidor para asegurar datos actualizados
+        list();
     }
 
     const addDeleteUser = (User) => {

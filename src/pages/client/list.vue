@@ -61,9 +61,6 @@
           { method: 'GET' }
         )
 
-        console.log('RESPUESTA COMPLETA:', resp)
-        console.log('CLIENTES:', resp.clients)
-
         // 👇 AQUÍ ESTÁ LA CLAVE
         list_clients.value = resp.clients.data
         totalPage.value = resp.total_page
@@ -160,8 +157,8 @@
                         />
                     </VCol>
                     <VCol cols="4">
-                        <VRow>
-                            <VCol cols="6" class="text-end">
+                        <VRow class="justify-end" >
+                            
                                 <VBtn  v-if="isPermission('register_client')" @click="isClientFinalAddDialogVisible = !isClientFinalAddDialogVisible">
                                     Solicitante
                                     <VIcon
@@ -169,8 +166,8 @@
                                         icon="ri-walk-line"
                                     />
                                 </VBtn>
-                            </VCol>
-                            <VCol cols="6" class="text-end">
+                            
+                            <!-- <VCol cols="6" class="text-end">
                                 <VBtn  v-if="isPermission('register_client')" @click="isClientCompanyAddDialogVisible = !isClientCompanyAddDialogVisible">
                                     Cliente Empresa
                                     <VIcon
@@ -178,7 +175,7 @@
                                         icon="ri-community-line"
                                     />
                                 </VBtn>
-                            </VCol>
+                            </VCol> -->
                         </VRow>
                     </VCol>
                 </VRow>

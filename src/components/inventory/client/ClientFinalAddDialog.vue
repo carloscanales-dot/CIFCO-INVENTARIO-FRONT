@@ -252,15 +252,26 @@ const dialogVisibleUpdate = val => {
             >
                 <VSelect
                     :items="[
-                        {
-                        id: 1,
-                        name: 'Cliente Final'
-                        },
+                        { id: 1, name: 'AUDITORIA INTERNA' },
+                        { id: 2, name: 'DIRECCION ADMINISTRATIVA FINANCIERA' },
+                        { id: 3, name: 'GERENCIA ADMINISTRATIVA' },
+                        { id: 4, name: 'GERENCIA DE BANQUETES' },
+                        { id: 5, name: 'GERENCIA DE MERCADEO' },
+                        { id: 6, name: 'GERENCIA DE OPERACIONES' },
+                        { id: 7, name: 'GERENCIA DE PROYECTOS' },
+                        { id: 8, name: 'GERENCIA DE RECURSOS HUMANOS' },
+                        { id: 9, name: 'GERENCIA DE VENTAS' },
+                        { id: 10, name: 'GERENCIA LEGAL' },
+                        { id: 11, name: 'PRESIDENCIA' },
+                        { id: 12, name: 'SEGURIDAD' },
+                        { id: 13, name: 'UNIDAD DE COMPRAS PUBLICAS' },
+                        { id: 14, name: 'UNIDAD INFORMATICA' },
+                        { id: 15, name: 'UNIDAD DE PLANIFICACION' },
                     ]"
                     item-title="name"
                     item-value="id"
-                    placeholder="Select"
-                    label="Tipo de cliente"
+                    placeholder="Seleccionar área"
+                    label="Area del solicitante"
                     v-model="type_client"
                     />
             </VCol>
