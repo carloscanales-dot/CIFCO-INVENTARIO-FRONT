@@ -79,7 +79,7 @@ const update = async() => {
         if(resp.message == 403){
             error_exits.value = resp.message_text;
         }else{
-            success.value = "El detallado de la compra se ha editado correctamente";
+            success.value = "El detallado de la entrada se ha editado correctamente";
             emit("editPurchaseDetail",resp);
             //   name.value = '';
             //   description.value = '';

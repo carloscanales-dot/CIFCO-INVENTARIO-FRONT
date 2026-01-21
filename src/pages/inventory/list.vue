@@ -25,6 +25,10 @@
                                 <VSelect v-model="sucursale_price_id" :items="sucursales" item-title="name" density="compact"
                                     item-value="id" label="Sucursal" />
                             </VCol>
+
+                            <VCol cols="12" sm="6" md="4" lg="3">
+                                <VCheckbox v-model="only_with_stock" label="Solo productos con stock" density="compact" />
+                            </VCol>
                         </VRow>
                         <VRow dense>
                             <VCol cols="12" md="4">
@@ -40,7 +44,7 @@
                             </VCol>
 
                             <VCol cols="12" md="4">
-                                <VBtn block color="success" prepend-icon="ri-file-excel-2-line" @click="downloadExcel" disabled>
+                                <VBtn block color="success" prepend-icon="ri-file-excel-2-line" @click="downloadExcel">
                                     Exportar
                                 </VBtn>
                             </VCol>
@@ -50,7 +54,14 @@
             </VCardText>
 
             <!-- Tabla de Inventario -->
-            <div class="table-container">
+            <div v-if="loading" class="d-flex justify-center align-center py-10">
+                <VProgressCircular
+                    indeterminate
+                    color="primary"
+                    size="64"
+                />
+            </div>
+            <div v-else class="table-container">
                 <VTable class="inventory-table">
                     <thead class="table-header">
                         <tr>
@@ -68,17 +79,7 @@
                         <tr v-for="item in list_products" :key="item.id" class="table-row">
                             <!-- Columna Producto -->
                             <td class="product-cell">
-                                <div class="product-info">
-                                    <div class="product-image-container">
-                                        <div class="square-avatar" :class="item.imagen ? '' : 'no-image'">
-                                            <VImg v-if="item.imagen" :src="item.imagen" class="product-image" />
-                                            <span v-else class="avatar-text">{{ avatarText(item.title) }}</span>
-                                        </div>
-                                    </div>
-                                    <div class="product-details">
-                                        <div class="product-name">{{ item.title }}</div>
-                                    </div>
-                                </div>
+                                <div class="product-name">{{ item.title }}</div>
                             </td>
 
                             <!-- Columna SKU -->
@@ -130,6 +131,7 @@ const router = useRouter()
 
 const currentPage = ref(1)
 const totalPage = ref(0)
+const loading = ref(false)
 
 const list_products = ref([])
 const inventory_stock = ref([]) // Almacenaremos el stock aquí
@@ -141,6 +143,7 @@ const searchQuery = ref(null)
 const product_categorie_id = ref(null)
 const warehouse_stock_id = ref(null)
 const sucursale_price_id = ref(null)
+const only_with_stock = ref(true) // Activado por defecto
 
 // Obtener stock de un producto en un almacén específico
 const getWarehouseStock = (productId, warehouseId) => {
@@ -173,11 +176,13 @@ const avatarText = (text) => {
 // Obtener lista de inventario
 const list = async () => {
     try {
+        loading.value = true
         let data = {
             search: searchQuery.value,
             product_categorie_id: product_categorie_id.value,
             warehouse_id: warehouse_stock_id.value,
             sucursale_id: sucursale_price_id.value,
+            only_with_stock: only_with_stock.value,
         }
 
         const resp = await $api("inventory/list?page=" + currentPage.value, {
@@ -193,6 +198,8 @@ const list = async () => {
         totalPage.value = resp.total_page || 1
     } catch (error) {
         console.error(error)
+    } finally {
+        loading.value = false
     }
 }
 
@@ -207,6 +214,7 @@ const reset = () => {
     product_categorie_id.value = null
     warehouse_stock_id.value = null
     sucursale_price_id.value = null
+    only_with_stock.value = true // Mantener activado por defecto
     currentPage.value = 1
     list()
 }
@@ -230,14 +238,34 @@ const config = async () => {
 }
 
 // Descargar Excel
-const downloadExcel = () => {
-    let queryParams = "?z=1"
-    if (searchQuery.value) queryParams += "&search=" + searchQuery.value
-    if (product_categorie_id.value) queryParams += "&product_categorie_id=" + product_categorie_id.value
-    if (warehouse_stock_id.value) queryParams += "&warehouse_id=" + warehouse_stock_id.value
-    if (sucursale_price_id.value) queryParams += "&sucursale_id=" + sucursale_price_id.value
+const downloadExcel = async () => {
+    try {
+        let data = {
+            search: searchQuery.value,
+            product_categorie_id: product_categorie_id.value,
+            warehouse_id: warehouse_stock_id.value,
+            sucursale_id: sucursale_price_id.value,
+            only_with_stock: only_with_stock.value,
+        }
 
-    window.open(import.meta.env.VITE_API_BASE_URL + 'inventory-excel' + queryParams, '_blank')
+        const response = await $api('/inventory-excel', {
+            method: 'POST',
+            body: data,
+            responseType: 'blob',
+        })
+
+        // Crear un enlace temporal para descargar el archivo
+        const url = window.URL.createObjectURL(new Blob([response]))
+        const link = document.createElement('a')
+        link.href = url
+        link.setAttribute('download', `inventario_${new Date().getTime()}.xlsx`)
+        document.body.appendChild(link)
+        link.click()
+        link.remove()
+        window.URL.revokeObjectURL(url)
+    } catch (error) {
+        console.error('Error al descargar:', error)
+    }
 }
 
 // Inicializar
@@ -246,7 +274,7 @@ onMounted(() => {
     list()
 })
 
-definePage({ meta: { permission: 'list_product', } })
+definePage({ meta: { permission: 'show_inventory_product', } })
 </script>
 
 <style scoped>

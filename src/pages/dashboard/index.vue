@@ -7,6 +7,8 @@
     const inventory_stock = ref([])
     const list_refounds = ref([])
     const lowStockProducts = ref([])
+    const expiringProducts = ref([])
+    const expiredProducts = ref([])
     const recentMovements = ref([])
     
     // Opciones de gráfica de stock por almacén
@@ -122,6 +124,17 @@
             .reduce((total, s) => total + Number(s.quantity), 0)
     }
 
+    // Formatear fecha con zona horaria de El Salvador
+    const formatDate = (date) => {
+        if (!date) return '-';
+        return new Date(date).toLocaleDateString('es-SV', {
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric',
+            timeZone: 'America/El_Salvador'
+        });
+    }
+
     // Calcular estadísticas del inventario
     const calculateInventoryStats = () => {
         const totalProducts = list_products.value.length
@@ -130,6 +143,24 @@
         // Productos con stock bajo (menos de 10 unidades)
         const lowStock = list_products.value.filter(p => getTotalStock(p.id) <= 10)
         lowStockProducts.value = lowStock.slice(0, 5) // Top 5
+        
+        // Productos por vencer (próximos 30 días)
+        const today = new Date()
+        const thirtyDaysFromNow = new Date(today.getTime() + (30 * 24 * 60 * 60 * 1000))
+        const expiring = list_products.value.filter(p => {
+            if (!p.expiration_date) return false
+            const expDate = new Date(p.expiration_date)
+            return expDate > today && expDate <= thirtyDaysFromNow
+        })
+        expiringProducts.value = expiring.slice(0, 5)
+        
+        // Productos vencidos
+        const expired = list_products.value.filter(p => {
+            if (!p.expiration_date) return false
+            const expDate = new Date(p.expiration_date)
+            return expDate <= today
+        })
+        expiredProducts.value = expired.slice(0, 5)
         
         // Calcular valor total del inventario
         const totalValue = list_products.value.reduce((sum, product) => {
@@ -177,9 +208,13 @@
             method: 'POST',
             body: {},
             onResponseError({response}){
-                console.log(response._data.error);
+                console.log('❌ Error en inventory/list:', response._data.error);
             }
         })
+        
+        console.log('📦 Respuesta de inventory/list:', resp)
+        console.log('📦 Productos recibidos:', resp.products?.data?.length || 0)
+        console.log('📦 Stock recibido:', resp.inventory?.length || 0)
         
         list_products.value = resp.products.data || []
         inventory_stock.value = resp.inventory || []
@@ -187,7 +222,7 @@
         calculateInventoryStats()
         calculateWarehouseChart()
       } catch (error) {
-        console.log(error);
+        console.log('❌ Error en getInventoryData:', error);
       }
     }
 
@@ -197,33 +232,50 @@
         const resp = await $api("products/config", {
             method: 'GET',
             onResponseError({response}){
-                console.log(response._data.error);
+                console.log('❌ Error en products/config:', response._data.error);
             }
         })
         
+        console.log('🏪 Respuesta de products/config:', resp)
+        console.log('🏪 Almacenes recibidos:', resp.warehouses?.length || 0, resp.warehouses)
+        
         warehouses.value = resp.warehouses || []
       } catch (error) {
-        console.log(error);
+        console.log('❌ Error en getConfig:', error);
       }
     }
 
     // Calcular datos para gráfica de almacenes
     const calculateWarehouseChart = () => {
-        if (warehouses.value.length === 0 || list_products.value.length === 0) return
+        console.log('📊 Ejecutando calculateWarehouseChart...')
+        console.log('📊 Almacenes disponibles:', warehouses.value.length, warehouses.value)
+        console.log('📊 Productos disponibles:', list_products.value.length)
+        console.log('📊 Stock disponible:', inventory_stock.value.length, inventory_stock.value)
+        
+        if (warehouses.value.length === 0 || list_products.value.length === 0) {
+            console.log('⚠️ No hay datos suficientes para el gráfico')
+            return
+        }
         
         warehouseChartOptions.value.xaxis.categories = warehouses.value.map(w => w.name)
         
         // Calcular stock total por almacén
         const stockByWarehouse = warehouses.value.map(warehouse => {
-            return inventory_stock.value
+            const stock = inventory_stock.value
                 .filter(s => s.warehouse_id === warehouse.id)
                 .reduce((total, s) => total + Number(s.quantity), 0)
+            console.log(`📊 Stock en ${warehouse.name} (ID: ${warehouse.id}):`, stock)
+            return stock
         })
+        
+        console.log('📊 Stock final por almacén:', stockByWarehouse)
         
         warehouseChartSeries.value = [{
             name: 'Stock Total',
             data: stockByWarehouse
         }]
+        
+        console.log('📊 Series del gráfico:', warehouseChartSeries.value)
     }
 
     // Obtener datos de salidas (refounds)
@@ -337,28 +389,6 @@
                 </VCard>
             </VCol>
 
-            <!-- Gráfico de stock por almacén -->
-            <VCol cols="12" md="8">
-                <VCard title="Stock por Almacén">
-                    <VCardText>
-                        <p class="text-body-2 text-medium-emphasis mb-4">
-                            Distribución de productos en cada almacén
-                        </p>
-                        <VueApexCharts
-                            v-if="warehouseChartSeries.length > 0"
-                            type="bar"
-                            height="350"
-                            :options="warehouseChartOptions"
-                            :series="warehouseChartSeries"
-                        />
-                        <div v-else class="text-center py-10">
-                            <VProgressCircular indeterminate color="primary" />
-                            <p class="text-body-2 mt-3">Cargando datos...</p>
-                        </div>
-                    </VCardText>
-                </VCard>
-            </VCol>
-
             <!-- Productos con stock bajo -->
             <VCol cols="12" md="4">
                 <VCard title="Alertas de Stock Bajo">
@@ -415,23 +445,113 @@
                 </VCard>
             </VCol>
 
-            <!-- Gráfico de movimientos mensuales -->
-            <VCol cols="12" md="12">
-                <VCard title="Movimientos Mensuales de Inventario">
+            <!-- Productos por vencer -->
+            <VCol cols="12" md="4">
+                <VCard title="Alertas de Stock por Vencer">
                     <VCardText>
                         <p class="text-body-2 text-medium-emphasis mb-4">
-                            Comparación de entradas y salidas de productos por mes
+                            Productos próximos a vencer (30 días)
                         </p>
-                        <VueApexCharts
-                            v-if="movementsChartSeries[0].data.length > 0"
-                            type="area"
-                            height="350"
-                            :options="movementsChartOptions"
-                            :series="movementsChartSeries"
-                        />
-                        <div v-else class="text-center py-10">
-                            <VProgressCircular indeterminate color="primary" />
-                            <p class="text-body-2 mt-3">Cargando movimientos...</p>
+                        
+                        <VList v-if="expiringProducts.length > 0" lines="two">
+                            <VListItem
+                                v-for="product in expiringProducts"
+                                :key="product.id"
+                                class="mb-2 pa-2"
+                            >
+                                <template #prepend>
+                                    <VAvatar
+                                        size="40"
+                                        :color="product.imagen ? '' : 'warning'"
+                                        :variant="!product.imagen ? 'tonal' : undefined"
+                                    >
+                                        <VImg v-if="product.imagen" :src="product.imagen" />
+                                        <span v-else class="text-sm">{{ avatarText(product.title) }}</span>
+                                    </VAvatar>
+                                </template>
+                                
+                                <VListItemTitle class="font-weight-medium">
+                                    {{ product.title }}
+                                </VListItemTitle>
+                                <VListItemSubtitle>
+                                    Vence: {{ formatDate(product.expiration_date) }}
+                                </VListItemSubtitle>
+
+                                <template #append>
+                                    <VChip
+                                        color="warning"
+                                        size="small"
+                                    >
+                                        {{ getTotalStock(product.id) }}
+                                    </VChip>
+                                </template>
+                            </VListItem>
+                        </VList>
+                        
+                        <div v-else class="text-center py-8">
+                            <VIcon 
+                                icon="ri-calendar-check-line" 
+                                size="48"
+                                color="success"
+                                class="mb-3"
+                            />
+                            <p class="text-body-2">No hay productos próximos a vencer</p>
+                        </div>
+                    </VCardText>
+                </VCard>
+            </VCol>
+
+            <!-- Productos vencidos -->
+            <VCol cols="12" md="4">
+                <VCard title="Stock Vencido">
+                    <VCardText>
+                        <p class="text-body-2 text-medium-emphasis mb-4">
+                            Productos con fecha de vencimiento expirada
+                        </p>
+                        
+                        <VList v-if="expiredProducts.length > 0" lines="two">
+                            <VListItem
+                                v-for="product in expiredProducts"
+                                :key="product.id"
+                                class="mb-2 pa-2"
+                            >
+                                <template #prepend>
+                                    <VAvatar
+                                        size="40"
+                                        :color="product.imagen ? '' : 'error'"
+                                        :variant="!product.imagen ? 'tonal' : undefined"
+                                    >
+                                        <VImg v-if="product.imagen" :src="product.imagen" />
+                                        <span v-else class="text-sm">{{ avatarText(product.title) }}</span>
+                                    </VAvatar>
+                                </template>
+                                
+                                <VListItemTitle class="font-weight-medium">
+                                    {{ product.title }}
+                                </VListItemTitle>
+                                <VListItemSubtitle>
+                                    Venció: {{ formatDate(product.expiration_date) }}
+                                </VListItemSubtitle>
+
+                                <template #append>
+                                    <VChip
+                                        color="error"
+                                        size="small"
+                                    >
+                                        {{ getTotalStock(product.id) }}
+                                    </VChip>
+                                </template>
+                            </VListItem>
+                        </VList>
+                        
+                        <div v-else class="text-center py-8">
+                            <VIcon 
+                                icon="ri-checkbox-circle-line" 
+                                size="48"
+                                color="success"
+                                class="mb-3"
+                            />
+                            <p class="text-body-2">No hay productos vencidos</p>
                         </div>
                     </VCardText>
                 </VCard>
@@ -492,7 +612,7 @@
                                             {{ movement.state == 1 ? 'Activo' : 'Inactivo' }}
                                         </VChip>
                                     </td>
-                                    <td>{{ new Date(movement.created_at).toLocaleDateString() }}</td>
+                                    <td>{{ formatDate(movement.created_at) }}</td>
                                 </tr>
                             </tbody>
                         </VTable>
@@ -505,6 +625,50 @@
                                 class="mb-3"
                             />
                             <p class="text-body-2">No hay movimientos recientes</p>
+                        </div>
+                    </VCardText>
+                </VCard>
+            </VCol>
+
+            <!-- Gráfico de movimientos mensuales -->
+            <VCol cols="12" md="12">
+                <VCard title="Movimientos Mensuales de Inventario">
+                    <VCardText>
+                        <p class="text-body-2 text-medium-emphasis mb-4">
+                            Comparación de entradas y salidas de productos por mes
+                        </p>
+                        <VueApexCharts
+                            v-if="movementsChartSeries[0].data.length > 0"
+                            type="area"
+                            height="350"
+                            :options="movementsChartOptions"
+                            :series="movementsChartSeries"
+                        />
+                        <div v-else class="text-center py-10">
+                            <VProgressCircular indeterminate color="primary" />
+                            <p class="text-body-2 mt-3">Cargando movimientos...</p>
+                        </div>
+                    </VCardText>
+                </VCard>
+            </VCol>
+
+            <!-- Gráfico de stock por almacén -->
+            <VCol cols="12">
+                <VCard title="Stock por Almacén">
+                    <VCardText>
+                        <p class="text-body-2 text-medium-emphasis mb-4">
+                            Distribución de productos en cada almacén
+                        </p>
+                        <VueApexCharts
+                            v-if="warehouseChartSeries.length > 0"
+                            type="bar"
+                            height="350"
+                            :options="warehouseChartOptions"
+                            :series="warehouseChartSeries"
+                        />
+                        <div v-else class="text-center py-10">
+                            <VProgressCircular indeterminate color="primary" />
+                            <p class="text-body-2 mt-3">Cargando datos...</p>
                         </div>
                     </VCardText>
                 </VCard>

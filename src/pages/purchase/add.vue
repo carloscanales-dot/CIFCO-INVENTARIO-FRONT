@@ -2,6 +2,7 @@
 
 const user = localStorage.getItem("user") ? JSON.parse(localStorage.getItem("user")) : null;
 
+const tipo_entrada = ref(null);
 const warehouse_id = ref(null);
 const date_emision = ref(null);
 const type_comprobant = ref(null);
@@ -171,6 +172,7 @@ const store = async () => {
         }
 
         let data = {
+            tipo_entrada: tipo_entrada.value,
             warehouse_id: warehouse_id.value,
             provider_id: provider_id.value,
             date_emision: date_emision.value,
@@ -252,6 +254,21 @@ definePage({ meta: { permission: 'register_purchase', } });
                 <VCard class="mb-6" title="Información General">
                     <VCardText>
                         <VRow dense>
+                            <!-- TIPO DE ENTRADA -->
+                            <VCol cols="12" sm="6" md="3">
+                                <VSelect 
+                                    v-model="tipo_entrada" 
+                                    :items="[
+                                        { value: 'compra', title: 'Entrada de compra' },
+                                        { value: 'regreso', title: 'Entrada de regreso a bodega' }
+                                    ]" 
+                                    item-title="title"
+                                    item-value="value"
+                                    label="Tipo de entrada" 
+                                    placeholder="Seleccionar tipo de entrada"
+                                />
+                            </VCol>
+
                             <!-- USUARIO / SUCURSAL -->
                             <VCol cols="12" sm="6" md="3">
                                 <VTextField v-model="user.full_name" label="Administrador de inventario" disabled />
@@ -274,7 +291,7 @@ definePage({ meta: { permission: 'register_purchase', } });
 
                             <!-- FECHAS -->
                             <VCol cols="12" sm="6" md="3">
-                                <AppDateTimePicker v-model="date_emision" label="Fecha de recepción"
+                                <AppDateTimePicker v-model="date_emision" label="Fecha de emisión"
                                     placeholder="Seleccionar fecha" />
                             </VCol>
 

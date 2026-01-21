@@ -140,7 +140,7 @@ definePage({ meta: { permission: 'list_purchase', } });
                     <VRow dense>
                         <!-- FILTROS -->
                         <VCol cols="12" sm="6" md="4" lg="3">
-                            <VTextField v-model="searchQuery" label="N° de compra" density="compact"
+                            <VTextField v-model="searchQuery" label="N° de Entrada" density="compact"
                                 @keyup.enter="list" />
                         </VCol>
 
@@ -225,7 +225,7 @@ definePage({ meta: { permission: 'list_purchase', } });
             <VTable density="comfortable">
                 <thead>
                     <tr>
-                        <th>N° Compra</th>
+                        <th>N° Entrada</th>
                         <th>Almacén</th>
                         <th>Proveedor</th>
                         <th>Fecha emisión</th>

@@ -50,5 +50,6 @@ declare module 'vue-router/auto-routes' {
     'transport-edit-id': RouteRecordInfo<'transport-edit-id', '/transport/edit/:id', { id: ParamValue<true> }, { id: ParamValue<false> }>,
     'transport-list': RouteRecordInfo<'transport-list', '/transport/list', Record<never, never>, Record<never, never>>,
     'users': RouteRecordInfo<'users', '/users', Record<never, never>, Record<never, never>>,
+    'users-sessions': RouteRecordInfo<'users-sessions', '/users/sessions', Record<never, never>, Record<never, never>>,
   }
 }

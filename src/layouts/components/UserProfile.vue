@@ -1,5 +1,6 @@
 <script setup>
 import { PerfectScrollbar } from 'vue3-perfect-scrollbar'
+import { $api } from '@/utils/api'
 import avatar1 from '@images/avatars/avatar-1.png'
 
 const userProfileList = [
@@ -45,11 +46,65 @@ const userProfileList = [
 const user = localStorage.getItem("user") ? JSON.parse(localStorage.getItem("user")) : null;
 const router = useRouter();
 const logout = async() => {
+  console.log('🔴 Frontend: Iniciando logout...');
+  
+  // Obtener el token ANTES de hacer nada
+  const token = localStorage.getItem("token");
+  console.log('🔑 Token obtenido:', token?.substring(0, 20) + '...');
+  console.log('👤 Usuario actual:', user?.email);
+  
+  if (!token) {
+    console.warn('⚠️ No hay token, limpiando y redirigiendo...');
+    localStorage.clear();
+    await router.push('/login');
+    return;
+  }
+  
+  try {
+    // Usar fetch nativo para evitar la validación de token expirado
+    console.log('📡 Enviando petición al backend con fetch...');
+    const baseURL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api';
+    
+    const response = await fetch(`${baseURL}/auth/logout`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      },
+    });
+    
+    console.log('📬 Respuesta recibida:', response.status, response.statusText);
+    
+    if (response.ok) {
+      const data = await response.json();
+      console.log('✅ Respuesta del backend:', data);
+      console.log('✅ Logout exitoso - Sesión cerrada en BD');
+    } else {
+      console.warn('⚠️ Respuesta no OK:', response.status);
+    }
+    
+    // Esperar un momento para asegurar que la BD se actualizó
+    console.log('⏳ Esperando confirmación de BD...');
+    await new Promise(resolve => setTimeout(resolve, 500));
+    
+  } catch (error) {
+    console.error('❌ Error al cerrar sesión:', error);
+    console.error('❌ Error detallado:', error.message);
+  }
+  
+  // Solo después de que el backend termine, limpiar localStorage
+  console.log('🧹 Backend procesado - Limpiando localStorage...');
   localStorage.removeItem("user");
   localStorage.removeItem("token");
 
-  // await router.push("/login");
-  window.location.reload();
+  console.log('🔄 Redirigiendo al login...');
+  await router.push('/login');
+  
+  // Recargar después de redirigir
+  setTimeout(() => {
+    window.location.reload();
+  }, 100);
 }
 </script>
 

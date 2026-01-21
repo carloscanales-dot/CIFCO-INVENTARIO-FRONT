@@ -22,11 +22,11 @@ export const kFormatter = num => {
  * @param {string} value date to format
  * @param {Intl.DateTimeFormatOptions} formatting Intl object to format with
  */
-export const formatDate = (value, formatting = { month: 'short', day: 'numeric', year: 'numeric' }) => {
+export const formatDate = (value, formatting = { month: 'short', day: 'numeric', year: 'numeric', timeZone: 'America/El_Salvador' }) => {
   if (!value)
     return value
   
-  return new Intl.DateTimeFormat('en-US', formatting).format(new Date(value))
+  return new Intl.DateTimeFormat('es-SV', { ...formatting, timeZone: 'America/El_Salvador' }).format(new Date(value))
 }
 
 /**
@@ -37,10 +37,10 @@ export const formatDate = (value, formatting = { month: 'short', day: 'numeric',
  */
 export const formatDateToMonthShort = (value, toTimeForCurrentDay = true) => {
   const date = new Date(value)
-  let formatting = { month: 'short', day: 'numeric' }
+  let formatting = { month: 'short', day: 'numeric', timeZone: 'America/El_Salvador' }
   if (toTimeForCurrentDay && isToday(date))
-    formatting = { hour: 'numeric', minute: 'numeric' }
+    formatting = { hour: 'numeric', minute: 'numeric', timeZone: 'America/El_Salvador' }
   
-  return new Intl.DateTimeFormat('en-US', formatting).format(new Date(value))
+  return new Intl.DateTimeFormat('es-SV', formatting).format(new Date(value))
 }
 export const prefixWithPlus = value => value > 0 ? `+${value}` : value

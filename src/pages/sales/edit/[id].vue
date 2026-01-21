@@ -15,6 +15,7 @@ const success_message = ref(null)
    CAMPOS
 ===================== */
 const date_emision = ref(null)
+const date_document = ref(null)
 const warehouse_id = ref(null)
 const warehouses = ref([])
 
@@ -52,6 +53,7 @@ const show = async () => {
     const d = resp.dispatch
 
     date_emision.value = d.date_emision
+    date_document.value = d.date_document
     warehouse_id.value = d.warehouse_id
     requester.value = d.requester?.full_name ?? ''
     requisition_number.value = d.requisition_number
@@ -81,6 +83,7 @@ const update = async () => {
         area_id: area_id.value,
         reference: reference.value,
         date_emision: date_emision.value,
+        date_document: date_document.value,
         description: description.value,
         details: dispatch_details.value,
       },
@@ -112,6 +115,11 @@ definePage({ meta: { permission: 'edit_dispatch' } })
       <VRow dense>
         <VCol cols="12" md="4">
           <AppDateTimePicker v-model="date_emision" label="Fecha emisión" />
+        </VCol>
+
+        <VCol cols="12" sm="6" md="3">
+          <AppDateTimePicker v-model="date_document" label="Fecha documento de recepción"
+            placeholder="Seleccionar fecha" />
         </VCol>
 
         <VCol cols="12" md="4">

@@ -44,12 +44,14 @@
     const list_users = ref([]);
     const sucursales = ref([]);
     const roles = ref([]);
+    const loading = ref(false);
     const searchQuery = ref(null);
     const user_selected_edit = ref(null);
     const user_selected_delete = ref(null);
 
     const list = async() => {
         try {
+            loading.value = true;
             const resp = await $api("users?search="+(searchQuery.value ? searchQuery.value : ''),{
                 method:'GET',
                 onResponseError({response}){
@@ -60,6 +62,8 @@
             list_users.value = resp.users;
         } catch (error) {
             console.log(error);
+        } finally {
+            loading.value = false;
         }
     }
 
@@ -159,7 +163,14 @@
                     </VCol>
                 </VRow>
             </VCardText>
-            <VDataTable
+            <div v-if="loading" class="d-flex justify-center align-center py-10">
+                <VProgressCircular
+                    indeterminate
+                    color="primary"
+                    size="64"
+                />
+            </div>
+            <VDataTable v-else
                 :headers="headers"
                 :items="list_users"
                 :items-per-page="5"
@@ -170,21 +181,6 @@
                 </template>
                 <template #item.full_name="{item}">
                     <div class="d-flex align-center">
-                        <VAvatar
-                            size="32"
-                            :color="item.avatar ? '' : 'primary'"
-                            :class="item.avatar ? '' : 'v-avatar-light-bg primary--text'"
-                            :variant="!item.avatar ? 'tonal' : undefined"
-                        >
-                        <VImg
-                            v-if="item.avatar"
-                            :src="item.avatar"
-                        />
-                        <span
-                            v-else
-                            class="text-sm"
-                        >{{ avatarText(item.full_name) }}</span>
-                        </VAvatar>
                         <div class="d-flex flex-column ms-3">
                             <span class="d-block font-weight-medium text-high-emphasis text-truncate">{{ item.full_name }}</span>
                             <!-- <small>{{ item.post }}</small> -->

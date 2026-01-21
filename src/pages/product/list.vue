@@ -68,7 +68,14 @@
 
 
             <!-- Tabla Mejorada con Imágenes Cuadradas -->
-            <div class="table-container">
+            <div v-if="loading" class="d-flex justify-center align-center py-10">
+                <VProgressCircular
+                    indeterminate
+                    color="primary"
+                    size="64"
+                />
+            </div>
+            <div v-else class="table-container">
                 <VTable class="products-table">
                     <thead class="table-header">
                         <tr>
@@ -110,15 +117,9 @@
 
                     <tbody class="table-body">
                         <tr v-for="item in list_products" :key="item.id" class="table-row">
-                            <!-- Columna Producto - CON IMAGEN CUADRADA -->
+                            <!-- Columna Producto -->
                             <td class="product-cell">
                                 <div class="product-info">
-                                    <div class="product-image-container">
-                                        <div class="square-avatar" :class="item.imagen ? '' : 'no-image'">
-                                            <VImg v-if="item.imagen" :src="item.imagen" class="product-image" />
-                                            <span v-else class="avatar-text">{{ avatarText(item.title) }}</span>
-                                        </div>
-                                    </div>
                                     <div class="product-details">
                                         <div class="product-name">{{ item.title }}</div>
                                         <div class="stock-status">
@@ -236,6 +237,7 @@ const isProductDeleteDialogVisible = ref(false);
 const isImportExcelProductDialogVisible = ref(false);
 const currentPage = ref(1);
 const totalPage = ref(0);
+const loading = ref(false);
 
 const list_products = ref([]);
 const sucursales = ref([]);
@@ -253,6 +255,7 @@ const product_selected_delete = ref(null);
 
 const list = async () => {
     try {
+        loading.value = true;
         let data = {
             search: searchQuery.value,
             product_categorie_id: product_categorie_id.value,
@@ -274,6 +277,8 @@ const list = async () => {
         totalPage.value = resp.total_page;
     } catch (error) {
         console.log(error);
+    } finally {
+        loading.value = false;
     }
 }
 
@@ -402,9 +407,9 @@ const formatCurrency = (value) => {
 }
 
 const formatDate = (dateString) => {
-    // Implementa tu lógica de formato de fecha aquí
-    const options = { year: 'numeric', month: 'short', day: 'numeric' };
-    return new Date(dateString).toLocaleDateString('es-ES', options);
+    // Formatear fecha con zona horaria de El Salvador
+    const options = { year: 'numeric', month: 'short', day: 'numeric', timeZone: 'America/El_Salvador' };
+    return new Date(dateString).toLocaleDateString('es-SV', options);
 }
 
 onMounted(() => {

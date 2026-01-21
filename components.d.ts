@@ -111,7 +111,6 @@ declare module 'vue' {
     UserEditDialog: typeof import('./src/components/inventory/users/UserEditDialog.vue')['default']
     UserInfoEditDialog: typeof import('./src/components/dialogs/UserInfoEditDialog.vue')['default']
     UserUpgradePlanDialog: typeof import('./src/components/dialogs/UserUpgradePlanDialog.vue')['default']
-    VueApexCharts: typeof import('vue3-apexcharts')['default']
     WalletProductDeleteDialog: typeof import('./src/components/inventory/product/wallets/WalletProductDeleteDialog.vue')['default']
     WalletProductEditDialog: typeof import('./src/components/inventory/product/wallets/WalletProductEditDialog.vue')['default']
     WarehouseAddDialog: typeof import('./src/components/inventory/configuration/warehouses/WarehouseAddDialog.vue')['default']

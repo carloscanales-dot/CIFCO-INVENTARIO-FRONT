@@ -83,12 +83,6 @@ const store = async() => {
     }, 50);
     return;
   }
-  if(!FILE_AVATAR.value){
-    setTimeout(() => {
-      warning.value = "Se debe seleccionar un imagen para el usuario";
-    }, 50);
-    return;
-  }
   if(!password.value){
     setTimeout(() => {
       warning.value = "Se debe llenar una contraseña para el usuario";
@@ -105,7 +99,9 @@ const store = async() => {
   formData.append("gender",gender.value);
   formData.append("password",password.value);
   formData.append("phone",phone.value);
-  formData.append("imagen",FILE_AVATAR.value);
+  if(FILE_AVATAR.value){
+    formData.append("imagen",FILE_AVATAR.value);
+  }
   formData.append("state",1);
   if(type_document.value){
     formData.append("type_document",type_document.value);
@@ -321,7 +317,7 @@ const dialogVisibleUpdate = val => {
             <VCol
               cols="6"
             >
-                <VFileInput label="Foto" @change="loadFile($event)" />
+                <VFileInput label="Foto (Opcional)" @change="loadFile($event)" />
 
                 <VImg
                     v-if="IMAGEN_PREVIZUALIZA"

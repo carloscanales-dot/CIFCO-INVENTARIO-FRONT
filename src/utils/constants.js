@@ -83,14 +83,10 @@ export const PERMISOS = [
                 name: 'Ver Existencias',
                 permiso: 'show_inventory_product',
             },
-            {
-                name: 'Ver billetera de precios',
-                permiso: 'show_wallet_price_product',
-            },
         ]
     },
     {
-        'name': 'Clientes',
+        'name': 'Solicitantes',
         'permisos': [
             {
                 name: 'Registrar',
@@ -111,37 +107,28 @@ export const PERMISOS = [
         ]
     },
     {
-        'name': 'Venta',
+        'name': 'Salidas',
         'permisos': [
             {
                 name: 'Registrar',
-                permiso: 'register_sale',
+                permiso: 'register_dispatch',
             },
             {
                 name: 'Listado',
-                permiso: 'list_sale',
+                permiso: 'list_dispatch',
             },
             {
                 name: 'Editar',
-                permiso: 'edit_sale',
+                permiso: 'edit_dispatch',
             },
             {
                 name: 'Eliminar',
-                permiso: 'delete_sale',
+                permiso: 'delete_dispatch',
             },
         ]
     },
     {
-        'name': 'Devolución',
-        'permisos': [
-            {
-                name: 'Disponible',
-                permiso: 'return',
-            },
-        ]
-    },
-    {
-        'name': 'Compras',
+        'name': 'Entradas',
         'permisos': [
             {
                 name: 'Registrar',
@@ -159,27 +146,6 @@ export const PERMISOS = [
             {
                 name: 'Eliminar',
                 permiso: 'delete_purchase',
-            },
-        ]
-    },
-    {
-        'name': 'Transporte',
-        'permisos': [
-            {
-                name: 'Registrar',
-                permiso: 'register_transport',
-            },
-            {
-                name: 'Listado',
-                permiso: 'list_transport',
-            },
-            {
-                name: 'Editar',
-                permiso: 'edit_transport',
-            },
-            {
-                name: 'Eliminar',
-                permiso: 'delete_transport',
             },
         ]
     },
@@ -203,16 +169,30 @@ export const PERMISOS = [
     },
 ];
 
+/**
+ * Verifica si el usuario tiene un permiso específico
+ * Esta función se mantiene por compatibilidad con código existente
+ * Se recomienda usar usePermissions() composable para nuevos componentes
+ */
 export function isPermission(permission) {
-    let USER = localStorage.getItem("user") ? JSON.parse(localStorage.getItem('user')) : null;
-    if(USER){
-        if(USER.role.name == 'Super-Admin'){
-            return true;
-        }
-        if(USER.permissions.includes(permission)){
-            return true;
-        }
+    // Si no se proporciona permiso o es 'all', retornar true
+    if (!permission || permission === 'all') {
+        return true;
     }
-    return false;
+
+    let USER = localStorage.getItem("user") ? JSON.parse(localStorage.getItem('user')) : null;
+    
+    if (!USER) {
+        return false;
+    }
+
+    // Super-Admin tiene todos los permisos
+    if (USER.role && USER.role.name === 'Super-Admin') {
+        return true;
+    }
+
+    // Verificar si el usuario tiene el permiso
+    const permissions = USER.permissions || [];
+    return permissions.includes(permission);
 }
   

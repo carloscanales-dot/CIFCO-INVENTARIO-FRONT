@@ -417,6 +417,7 @@ declare module 'vue' {
     readonly isEmptyArray: UnwrapRef<typeof import('./src/@core/utils/helpers.js')['isEmptyArray']>
     readonly isNullOrUndefined: UnwrapRef<typeof import('./src/@core/utils/helpers.js')['isNullOrUndefined']>
     readonly isObject: UnwrapRef<typeof import('./src/@core/utils/helpers.js')['isObject']>
+    readonly isPermission: UnwrapRef<typeof import('./src/composables/usePermissions.js')['isPermission']>
     readonly isPermission: UnwrapRef<typeof import('./src/utils/constants.js')['isPermission']>
     readonly isProxy: UnwrapRef<typeof import('vue')['isProxy']>
     readonly isReactive: UnwrapRef<typeof import('vue')['isReactive']>
@@ -764,6 +765,7 @@ declare module '@vue/runtime-core' {
     readonly isEmptyArray: UnwrapRef<typeof import('./src/@core/utils/helpers.js')['isEmptyArray']>
     readonly isNullOrUndefined: UnwrapRef<typeof import('./src/@core/utils/helpers.js')['isNullOrUndefined']>
     readonly isObject: UnwrapRef<typeof import('./src/@core/utils/helpers.js')['isObject']>
+    readonly isPermission: UnwrapRef<typeof import('./src/composables/usePermissions.js')['isPermission']>
     readonly isPermission: UnwrapRef<typeof import('./src/utils/constants.js')['isPermission']>
     readonly isProxy: UnwrapRef<typeof import('vue')['isProxy']>
     readonly isReactive: UnwrapRef<typeof import('vue')['isReactive']>

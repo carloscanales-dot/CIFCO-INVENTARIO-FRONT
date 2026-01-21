@@ -9,6 +9,7 @@ const isClientFinalAddDialogVisible = ref(false)
 const isClientCompanyAddDialogVisible = ref(false)
 
 const date_emision = ref(null)
+const date_document = ref(null)
 const description = ref(null)
 
 const warehouses = ref([])
@@ -212,6 +213,7 @@ const store = async () => {
       area_id: area_id.value,
       reference: reference.value,
       date_emision: date_emision.value,
+      date_document: date_document.value,
       description: description.value,
       details: dispatch_details.value,
     },
@@ -242,6 +244,11 @@ onMounted(config)
       <VRow dense>
         <VCol cols="12" md="4">
           <AppDateTimePicker v-model="date_emision" label="Fecha emisión" />
+        </VCol>
+
+        <VCol cols="12" sm="6" md="3">
+          <AppDateTimePicker v-model="date_document" label="Fecha documento de recepción"
+            placeholder="Seleccionar fecha" />
         </VCol>
 
         <VCol cols="12" md="4">

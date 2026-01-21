@@ -247,7 +247,7 @@ const dialogVisibleUpdate = val => {
       <VCardText class="pt-5">
         <div class="text-center pb-6">
           <h4 class="text-h4 mb-2">
-            Editar Cliente Final -> {{ props.clientSelected.full_name }}
+            Editar Solicitante -> {{ props.clientSelected.full_name }}
           </h4>
         </div>
 
@@ -264,7 +264,7 @@ const dialogVisibleUpdate = val => {
               <VTextField
                 v-model="name"
                 label="Nombre del Cliente"
-                placeholder="Ejemplo: Juan"
+                placeholder="Ejemplo: Jose"
               />
             </VCol>
 
@@ -274,7 +274,7 @@ const dialogVisibleUpdate = val => {
               <VTextField
                 v-model="surname"
                 label="Apellido del Cliente"
-                placeholder="Ejemplo: Pérez"
+                placeholder="Ejemplo: Ramirez"
               />
             </VCol>
             
@@ -283,15 +283,26 @@ const dialogVisibleUpdate = val => {
             >
                 <VSelect
                     :items="[
-                        {
-                        id: 1,
-                        name: 'Cliente Final'
-                        },
+                        { id: 1, name: 'AUDITORIA INTERNA' },
+                        { id: 2, name: 'DIRECCION ADMINISTRATIVA FINANCIERA' },
+                        { id: 3, name: 'GERENCIA ADMINISTRATIVA' },
+                        { id: 4, name: 'GERENCIA DE BANQUETES' },
+                        { id: 5, name: 'GERENCIA DE MERCADEO' },
+                        { id: 6, name: 'GERENCIA DE OPERACIONES' },
+                        { id: 7, name: 'GERENCIA DE PROYECTOS' },
+                        { id: 8, name: 'GERENCIA DE RECURSOS HUMANOS' },
+                        { id: 9, name: 'GERENCIA DE VENTAS' },
+                        { id: 10, name: 'GERENCIA LEGAL' },
+                        { id: 11, name: 'PRESIDENCIA' },
+                        { id: 12, name: 'SEGURIDAD' },
+                        { id: 13, name: 'UNIDAD DE COMPRAS PUBLICAS' },
+                        { id: 14, name: 'UNIDAD INFORMATICA' },
+                        { id: 15, name: 'UNIDAD DE PLANIFICACION' },
                     ]"
                     item-title="name"
                     item-value="id"
-                    placeholder="Seleccionar"
-                    label="Tipo de cliente"
+                    placeholder="Seleccionar área"
+                    label="Area del solicitante"
                     v-model="type_client"
                     />
             </VCol>
@@ -322,24 +333,24 @@ const dialogVisibleUpdate = val => {
             >
                 <VSelect
                     :items="[
-                        'DNI',
+                        'DUI',
                         'PASAPORTE'
                     ]"
                     v-model="type_document"
                     label="Tipo de documento"
-                    placeholder="Seleccionar"
+                    placeholder="Seleccionar documento"
                     eager
                 />
             </VCol>
 
             <VCol
-              cols="5"
+              cols="6"
             >
               <VTextField
                 v-model="n_document"
                 type="number"
-                label="N° Documento"
-                placeholder="Ejemplo: 99999999"
+                label="N° Document"
+                placeholder="Ejemplo: 111111111"
               />
             </VCol>
 
@@ -356,29 +367,6 @@ const dialogVisibleUpdate = val => {
                     value="F"
                 />
               </VRadioGroup>
-            </VCol>
-
-            <!--<VCol
-              cols="6"
-            >
-                <VSelect
-                    :items="[
-                        {
-                            name: 'Activo',
-                            id: 1,
-                        },
-                        {
-                            name: 'Inactivo',
-                            id: 2,
-                        },
-                    ]"
-                    item-title="name"
-                    item-value="id"
-                    v-model="state"
-                    label="Estado"
-                    placeholder="Seleccionar"
-                    eager
-                />
             </VCol>
 
             <VCol
@@ -399,45 +387,14 @@ const dialogVisibleUpdate = val => {
                         </div>
                     </div>
                 </div>
-            </VCol>-->
-
-                        <VCol
-              cols="6"
-              class="d-flex align-center"
-            >
-              <VSelect
-              :items="[
-                { name: 'Activo', id: 1 },
-                { name: 'Inactivo', id: 2 }
-              ]"
-              item-title="name"
-              item-value="id"
-              v-model="state"
-              label="Estado"
-              placeholder="Seleccionar"
-              eager
-              class="flex-grow-1"
-              />
             </VCol>
 
             <VCol
               cols="6"
-              class="d-flex align-center"
-            >
-              <VTextField
-              v-model="birth_date"
-              label="Fecha de nacimiento"
-              type="date"
-              class="flex-grow-1"
-              />
-            </VCol>
-
-            <VCol
-              cols="12"
             >
                 <VTextarea
                     v-model="address"
-                    label="Dirección: "
+                    label="Dirección "
                     placeholder=""
                 />
 

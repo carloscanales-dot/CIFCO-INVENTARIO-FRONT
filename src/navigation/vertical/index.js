@@ -2,7 +2,7 @@ export default [
   {
     title: 'Dashboard',
     to: { name: 'dashboard' },
-    permission: "all",
+    permission: 'dashboard',
     icon: { icon: 'ri-bar-chart-fill' },
   },
   { heading: 'Accesos',permissions: ['list_role','list_user','settings'] },
@@ -17,6 +17,12 @@ export default [
     to: { name: 'users' },
     permission: 'list_user',
     icon: { icon: 'ri-group-3-line' },
+  },
+  {
+    title: 'Sesiones de Usuarios',
+    to: { name: 'users-sessions' },
+    permission: 'list_user',
+    icon: { icon: 'ri-shield-user-line' },
   },
   {
     title: 'Configuraciones',
@@ -54,11 +60,11 @@ export default [
       },
     ],
   },
-  { heading: 'productos',permissions: ['list_product','register_product','list_client','register_sale','list_sale','return'] },
+  { heading: 'productos',permissions: ['list_product','register_product','show_inventory_product'] },
   {
     title: 'Inventario',
     to: 'inventory-list',
-    permission: 'list_product',
+    permission: 'show_inventory_product',
     icon: { icon: 'ri-database-2-line' },
   },
   {
@@ -79,14 +85,14 @@ export default [
       },
     ],
   },
-  { heading: 'Solicitante',permissions: ['list_product','register_product','list_client','register_sale','list_sale','return'] },
+  { heading: 'Solicitante',permissions: ['list_client','register_client'] },
   {
     title: 'Solicitantes',
     icon: { icon: 'ri-team-line' },
     permission: 'list_client',
     to: 'client-list',
   },
-  { heading: 'Salidas',permissions: ['list_product','register_product','list_client','register_sale','list_sale','return'] },
+  { heading: 'Salidas',permissions: ['register_dispatch','list_dispatch','edit_dispatch','delete_dispatch'] },
     {
     title: 'Salidas',
     icon: { icon: 'ri-exchange-dollar-line' },
@@ -94,13 +100,13 @@ export default [
       {
         title: 'Registrar',
         to: 'sales-add',
-        permission: 'register_sale',
+        permission: 'register_dispatch',
         icon: { icon: 'ri-capsule-fill' },
       },
       {
         title: 'Listado',
         to: 'sales-list',
-        permission: 'list_sale',
+        permission: 'list_dispatch',
         icon: { icon: 'ri-capsule-fill' },
       },
     ],

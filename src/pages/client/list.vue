@@ -1,4 +1,27 @@
 <script setup>
+    // Mapeo de áreas según los IDs
+    const AREAS = {
+        1: 'AUDITORIA INTERNA',
+        2: 'DIRECCION ADMINISTRATIVA FINANCIERA',
+        3: 'GERENCIA ADMINISTRATIVA',
+        4: 'GERENCIA DE BANQUETES',
+        5: 'GERENCIA DE MERCADEO',
+        6: 'GERENCIA DE OPERACIONES',
+        7: 'GERENCIA DE PROYECTOS',
+        8: 'GERENCIA DE RECURSOS HUMANOS',
+        9: 'GERENCIA DE VENTAS',
+        10: 'GERENCIA LEGAL',
+        11: 'PRESIDENCIA',
+        12: 'SEGURIDAD',
+        13: 'UNIDAD DE COMPRAS PUBLICAS',
+        14: 'UNIDAD INFORMATICA',
+        15: 'UNIDAD DE PLANIFICACION',
+    };
+
+    const getAreaName = (areaId) => {
+        return AREAS[areaId] || 'N/A';
+    };
+
     const headers = [
         {
             title: 'ID',
@@ -49,6 +72,7 @@
     const list_clients = ref([]);
     const currentPage = ref(1);
     const totalPage = ref(0);
+    const loading = ref(false);
     const searchQuery = ref(null);
     const client_final_selected_edit = ref(null);
     const client_company_selected_edit = ref(null);
@@ -56,6 +80,7 @@
 
     const list = async () => {
       try {
+        loading.value = true;
         const resp = await $api(
           `clients?page=${currentPage.value}&search=${searchQuery.value ?? ''}`,
           { method: 'GET' }
@@ -67,6 +92,8 @@
 
       } catch (error) {
         console.log(error)
+      } finally {
+        loading.value = false;
       }
     }
 
@@ -110,13 +137,9 @@
     const editItem = (item) => {
         console.log(item);
         isClientEditDialogVisible.value = true;
-        if(item.type_client == 1) {//CLIENTE FINAL
-            client_final_selected_edit.value = item;
-            client_company_selected_edit.value = null;
-        }else{
-            client_company_selected_edit.value = item;
-            client_final_selected_edit.value = null;
-        }
+        // Todos los clientes son ahora "Cliente Final" con diferentes áreas
+        client_final_selected_edit.value = item;
+        client_company_selected_edit.value = null;
     }
     const deleteItem = (item) => {
         isClientDeleteDialogVisible.value = true;
@@ -149,7 +172,7 @@
                 <VRow class="justify-space-between">
                     <VCol cols="3">
                         <VTextField
-                            placeholder="Buscar Cliente"
+                            placeholder="Buscar Solicitante"
                             density="compact"
                             class="me-3"
                             v-model="searchQuery"
@@ -181,7 +204,14 @@
                 </VRow>
             </VCardText>
 
-            <VTable>
+            <div v-if="loading" class="d-flex justify-center align-center py-10">
+                <VProgressCircular
+                    indeterminate
+                    color="primary"
+                    size="64"
+                />
+            </div>
+            <VTable v-else>
               <thead>
                 <tr>
                     <th class="text-uppercase" v-for="(header, index) in headers" :key="index">
@@ -198,8 +228,9 @@
                     <td>{{ client.id }}</td>
                     <td>{{ client.full_name }}</td>
                     <td>
-                        <span v-if="client.type_client == 1">Cliente Final</span>
-                        <span v-if="client.type_client == 2">Cliente Empresa</span>
+                        <VChip color="info" size="small">
+                            {{ getAreaName(client.type_client) }}
+                        </VChip>
                     </td>
                     <td>
                         <span>{{ client.type_document }}</span>

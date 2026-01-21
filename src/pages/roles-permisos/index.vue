@@ -27,12 +27,14 @@
     const isRoleDeleteDialogVisible = ref(false);
     
     const list_roles = ref([]);
+    const loading = ref(false);
     const searchQuery = ref(null);
     const role_selected_edit = ref(null);
     const role_selected_delete = ref(null);
 
     const list = async() => {
         try {
+            loading.value = true;
             const resp = await $api("role?search="+(searchQuery.value ? searchQuery.value : ''),{
                 method:'GET',
                 onResponseError({response}){
@@ -43,6 +45,8 @@
             list_roles.value = resp.roles;
         } catch (error) {
             console.log(error);
+        } finally {
+            loading.value = false;
         }
     }
 
@@ -123,7 +127,14 @@
                     </VCol>
                 </VRow>
             </VCardText>
-            <VDataTable
+            <div v-if="loading" class="d-flex justify-center align-center py-10">
+                <VProgressCircular
+                    indeterminate
+                    color="primary"
+                    size="64"
+                />
+            </div>
+            <VDataTable v-else
                 :headers="headers"
                 :items="list_roles"
                 :items-per-page="5"

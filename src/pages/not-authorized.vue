@@ -9,28 +9,28 @@
 
     <div class="container">
       <div class="logo">
-        <div class="logo-icon">+</div>
+        <div class="logo-icon">📦</div>
       </div>
 
-      <h1>FARMACIA LA ESPERANZA</h1>
-      <p class="tagline">Su salud es nuestra prioridad</p>
+      <h1>SISTEMA DE INVENTARIO CIFCO</h1>
+      <p class="tagline">Gestión eficiente de inventarios y recursos</p>
 
       <div class="features">
         <div class="feature">
-          <div class="feature-icon">💊</div>
-          <div class="feature-text">Medicamentos</div>
+          <div class="feature-icon">�</div>
+          <div class="feature-text">Control</div>
         </div>
         <div class="feature">
-          <div class="feature-icon">👨‍⚕️</div>
-          <div class="feature-text">Asesoría</div>
+          <div class="feature-icon">📦</div>
+          <div class="feature-text">Inventarios</div>
         </div>
         <div class="feature">
-          <div class="feature-icon">🏠</div>
-          <div class="feature-text">Domicilios</div>
+          <div class="feature-icon">📈</div>
+          <div class="feature-text">Reportes</div>
         </div>
       </div>
 
-      <button class="contact-btn">Contáctenos</button>
+      <button class="contact-btn">Solicitar Acceso</button>
     </div>
   </div>
 </template>
@@ -62,13 +62,13 @@ export default {
 }
 
 .page-container {
-  background-color: #e8f9ee;
+  background-color: #e8f4f9;
   font-family: "Montserrat", sans-serif;
   min-height: 100vh;
   display: flex;
   justify-content: center;
   align-items: center;
-  color: #2d5a3d;
+  color: #1e3a5f;
   position: relative;
   overflow: hidden;
 }
@@ -88,7 +88,7 @@ export default {
 .logo-icon {
   width: 80px;
   height: 80px;
-  background: #2d5a3d;
+  background: #1e3a5f;
   border-radius: 50%;
   margin: 0 auto 1.5rem;
   display: flex;
@@ -96,7 +96,7 @@ export default {
   justify-content: center;
   color: white;
   font-size: 2rem;
-  box-shadow: 0 4px 12px rgba(45, 90, 61, 0.2);
+  box-shadow: 0 4px 12px rgba(30, 58, 95, 0.2);
 }
 
 h1 {
@@ -138,7 +138,7 @@ h1 {
 .feature-icon {
   font-size: 2rem;
   margin-bottom: 0.8rem;
-  color: #2d5a3d;
+  color: #1e3a5f;
 }
 
 .feature-text {
@@ -147,7 +147,7 @@ h1 {
 }
 
 .contact-btn {
-  background: #2d5a3d;
+  background: #1e3a5f;
   color: white;
   border: none;
   padding: 1rem 2.5rem;
@@ -156,11 +156,11 @@ h1 {
   cursor: pointer;
   font-weight: 600;
   transition: all 0.3s ease;
-  box-shadow: 0 4px 12px rgba(45, 90, 61, 0.3);
+  box-shadow: 0 4px 12px rgba(30, 58, 95, 0.3);
 }
 
 .contact-btn:hover {
-  background: #1e3f2a;
+  background: #142740;
   transform: translateY(-2px);
 }
 
@@ -173,7 +173,7 @@ h1 {
   width: 300px;
   height: 300px;
   border-radius: 50%;
-  background: rgba(45, 90, 61, 0.05);
+  background: rgba(30, 58, 95, 0.05);
   top: -150px;
   right: -100px;
 }
@@ -182,7 +182,7 @@ h1 {
   width: 200px;
   height: 200px;
   border-radius: 50%;
-  background: rgba(45, 90, 61, 0.05);
+  background: rgba(30, 58, 95, 0.05);
   bottom: -100px;
   left: -50px;
 }

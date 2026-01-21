@@ -105,7 +105,7 @@ const config = async () => {
    ACCIONES
 ===================== */
 const addDispatch = () => {
-  router.push({ name: 'dispatches-add' })
+  router.push({ name: 'sales-add' })
 }
 
 const showDetail = dispatch => {

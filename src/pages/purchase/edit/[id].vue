@@ -8,6 +8,7 @@
     const isPurchaseDetailDeleteDialogVisible = ref(false);
     const purchase_detail_delete_selected = ref(null);
 
+    const tipo_entrada = ref(null);
     const warehouse_id = ref(null);
     const date_emision = ref(null);
     const type_comprobant = ref(null);
@@ -250,6 +251,7 @@
 
             let data = {
                 // warehouse_id: warehouse_id.value,
+                tipo_entrada: tipo_entrada.value,
                 provider_id: provider_id.value,
                 // date_emision: date_emision.value,
                 type_comprobant: type_comprobant.value,
@@ -267,7 +269,7 @@
                 }
             })
             console.log(resp);
-            success_purchase.value = "LA COMPRA SE HA ACTUALIZADO CORRECTAMENTE";
+            success_purchase.value = "LA ENTRADA SE HA ACTUALIZADO CORRECTAMENTE";
             // Esperar 1 segundos y redirigir a la lista de ventas
             setTimeout(() => {
                 router.push({ name: 'purchase-list' });
@@ -306,6 +308,7 @@
             })
             console.log(resp);
             warehouse_id.value = resp.purchase.warehouse_id;
+            tipo_entrada.value = resp.purchase.tipo_entrada;
             provider_id.value = resp.purchase.provider_id;
             date_emision.value = resp.purchase.date_emision;
             date_document.value = resp.purchase.date_document
@@ -332,7 +335,7 @@
         <div class="d-flex flex-wrap justify-space-between gap-4 mb-6">
             <div class="d-flex flex-column justify-center">
                 <h4 class="text-h4 mb-1">
-                    Editar Compra : N° {{ route.params.id }}
+                    Editar Entrada : N° {{ route.params.id }}
                 </h4>
             </div>
         </div>
@@ -345,6 +348,19 @@
                     >
                     <VCardText>
                         <VRow>
+                            <VCol cols="3">
+                                <VSelect 
+                                    v-model="tipo_entrada" 
+                                    :items="[
+                                        { value: 'compra', title: 'Entrada de compra' },
+                                        { value: 'regreso', title: 'Entrada de regreso a bodega' }
+                                    ]" 
+                                    item-title="title"
+                                    item-value="value"
+                                    label="Tipo de entrada" 
+                                    placeholder="Seleccionar tipo de entrada"
+                                />
+                            </VCol>
                             <VCol cols="3">
                                 <VTextField
                                     label="Solicitante"
@@ -533,7 +549,7 @@
             <VCol cols="12">
                 <VCard
                     class="mb-6"
-                    title="Detalle de la compra"
+                    title="Detalle de la entrada"
                     >
 
                     <VTable>
@@ -644,7 +660,7 @@
             </VCol>
             <VCol cols="12">
                 <VBtn block @click="update">
-                    Editar la Compra
+                    Editar la Entrada
                 </VBtn>
             </VCol>
         </VRow>
