@@ -88,6 +88,9 @@
                             <th class="text-uppercase column-categoria">
                                 Categoría
                             </th>
+                            <th class="text-uppercase column-precio-promedio">
+                                Precio Promedio
+                            </th>
                             <th class="text-uppercase column-vencimiento">
                                 Vencimiento
                             </th>
@@ -141,6 +144,21 @@
                             <td class="category-cell">
                                 <div class="category-badge">
                                     {{ item.product_categorie.name }}
+                                </div>
+                            </td>
+
+                            <!-- Columna Precio Promedio -->
+                            <td class="average-price-cell">
+                                <div class="price-info">
+                                    <div v-if="item.average_prices && item.average_prices.length > 0" class="prices-list">
+                                        <div v-for="avg in item.average_prices" :key="avg.unit_id" class="price-item">
+                                            <span class="unit-badge">{{ avg.unit.name }}</span>
+                                            <span class="price-value">{{ formatCurrency(avg.average_price) }}</span>
+                                        </div>
+                                    </div>
+                                    <div v-else class="no-price">
+                                        <span class="text-muted">Sin compras</span>
+                                    </div>
                                 </div>
                             </td>
 
@@ -611,6 +629,60 @@ definePage({ meta: { permission: 'list_product', } });
 
 .warranty-icon {
     color: #28a745;
+}
+
+.average-price-cell {
+    min-width: 180px;
+}
+
+.price-info {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.prices-list {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.price-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 4px 0;
+}
+
+.unit-badge {
+    display: inline-block;
+    padding: 2px 8px;
+    background-color: #e3f2fd;
+    border-radius: 4px;
+    font-size: 0.7rem;
+    color: #1976d2;
+    font-weight: 600;
+    min-width: 50px;
+    text-align: center;
+}
+
+.price-value {
+    font-weight: 600;
+    color: #2e7d32;
+    font-size: 0.875rem;
+}
+
+.no-price {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 8px;
+}
+
+.text-muted {
+    color: #9e9e9e;
+    font-size: 0.8rem;
+    font-style: italic;
 }
 
 .status-chip {

@@ -28,9 +28,12 @@ const description = ref(null)
 const areas = ref([
   { id: 1, name: 'Informática' },
   { id: 2, name: 'Recursos Humanos' },
-  { id: 3, name: 'Administración' },
-  { id: 4, name: 'Finanzas' },
-  { id: 5, name: 'Logística' },
+  { id: 3, name: 'Contabilidad' },
+  { id: 4, name: 'Administración' },
+  { id: 5, name: 'Compras' },
+  { id: 6, name: 'Logística' },
+  { id: 7, name: 'Gerencia' },
+  { id: 8, name: 'Operaciones' },
 ])
 
 const dispatch_details = ref([])
@@ -52,14 +55,14 @@ const show = async () => {
     const resp = await $api(`dispatches/${route.params.id}`)
     const d = resp.dispatch
 
-    date_emision.value = d.date_emision
-    date_document.value = d.date_document
-    warehouse_id.value = d.warehouse_id
+    date_emision.value = d.date_emision ?? null
+    date_document.value = d.date_document ?? null
+    warehouse_id.value = d.warehouse_id ?? null
     requester.value = d.requester?.full_name ?? ''
-    requisition_number.value = d.requisition_number
-    area_id.value = d.area_id
-    reference.value = d.reference
-    description.value = d.description
+    requisition_number.value = d.requisition_number ?? null
+    area_id.value = d.area_id ?? null
+    reference.value = d.reference ?? null
+    description.value = d.description ?? null
     dispatch_details.value = d.details ?? []
   } catch (e) {
     console.error(e)
@@ -117,7 +120,7 @@ definePage({ meta: { permission: 'edit_dispatch' } })
           <AppDateTimePicker v-model="date_emision" label="Fecha emisión" />
         </VCol>
 
-        <VCol cols="12" sm="6" md="3">
+        <VCol cols="12" sm="12" md="4">
           <AppDateTimePicker v-model="date_document" label="Fecha documento de recepción"
             placeholder="Seleccionar fecha" />
         </VCol>
@@ -170,6 +173,7 @@ definePage({ meta: { permission: 'edit_dispatch' } })
     <VTable>
       <thead>
         <tr>
+          <th>SKU</th>
           <th>Producto</th>
           <th>Unidad</th>
           <th>Cantidad</th>
@@ -177,6 +181,7 @@ definePage({ meta: { permission: 'edit_dispatch' } })
       </thead>
       <tbody>
         <tr v-for="(d, i) in dispatch_details" :key="i">
+          <td>{{ d.product.sku }}</td>
           <td>{{ d.product.title }}</td>
           <td>{{ d.unit.name }}</td>
           <td>{{ d.quantity }}</td>

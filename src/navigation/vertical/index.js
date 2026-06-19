@@ -99,13 +99,13 @@ export default [
     children: [
       {
         title: 'Registrar',
-        to: 'sales-add',
+        to: 'dispatches-add',
         permission: 'register_dispatch',
         icon: { icon: 'ri-capsule-fill' },
       },
       {
         title: 'Listado',
-        to: 'sales-list',
+        to: 'dispatches-list',
         permission: 'list_dispatch',
         icon: { icon: 'ri-capsule-fill' },
       },

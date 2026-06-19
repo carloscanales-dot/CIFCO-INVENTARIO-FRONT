@@ -1,5 +1,5 @@
 <script setup>
-import { ref, watch, onMounted } from 'vue'
+import { ref, watch, onMounted, onUnmounted } from 'vue'
 
 /* =====================
    ESTADO GENERAL
@@ -7,6 +7,7 @@ import { ref, watch, onMounted } from 'vue'
 const isClientSearchDialogVisible = ref(false)
 const isClientFinalAddDialogVisible = ref(false)
 const isClientCompanyAddDialogVisible = ref(false)
+const isConfigLoaded = ref(false)
 
 const date_emision = ref(null)
 const date_document = ref(null)
@@ -33,6 +34,7 @@ const areas = ref([
   { id: 5, name: 'Compras' },
   { id: 6, name: 'Logística' },
   { id: 7, name: 'Gerencia' },
+  { id: 8, name: 'Operaciones' },
 ])
 
 const reference = ref(null)
@@ -53,20 +55,33 @@ const dispatch_details = ref([])
 
 const warning_warehouse = ref(null)
 const warning_client_product = ref(null)
+const warning_product_search = ref(null)
+
+let searchTimeout = null
 
 /* =====================
    CONFIG
 ===================== */
+const getTodayDate = () => {
+  const today = new Date()
+  const year = today.getFullYear()
+  const month = String(today.getMonth() + 1).padStart(2, '0')
+  const day = String(today.getDate()).padStart(2, '0')
+  return `${year}-${month}-${day}`
+}
+
 const config = async () => {
-  const resp = await $api('sales/config')
-  date_emision.value = resp.today
-
-  const user = JSON.parse(localStorage.getItem('user'))
-  warehouses.value = resp.warehouses.filter(
-    w => w.sucursale_id === user.sucursale_id
-  )
-
-
+  try {
+    const resp = await $api('dispatches/config')
+    date_emision.value = resp.today ?? getTodayDate()
+    warehouses.value = resp.warehouses ?? []
+    isConfigLoaded.value = true
+  } catch (error) {
+    console.error('Error cargando configuración:', error)
+    date_emision.value = getTodayDate()
+    warehouses.value = []
+    isConfigLoaded.value = true
+  }
 }
 
 /* =====================
@@ -75,7 +90,7 @@ const config = async () => {
 const searchClient = async () => {
   warning_client.value = null
   const resp = await $api(
-    `sales/search_client?search=${search_client.value ?? ''}`
+    `dispatches/search_client?search=${search_client.value ?? ''}`
   )
 
   list_clients.value = resp.clients
@@ -100,6 +115,12 @@ const selectedClient = client => {
 watch(search_product, async query => {
   warning_warehouse.value = null
   warning_client_product.value = null
+  warning_product_search.value = null
+
+  // Cancelar búsqueda anterior si existe
+  if (searchTimeout) {
+    clearTimeout(searchTimeout)
+  }
 
   if (!warehouse_id.value) {
     warning_warehouse.value = 'Seleccione un almacén primero'
@@ -111,14 +132,30 @@ watch(search_product, async query => {
     return
   }
 
-  if (query && query.length > 3) {
-    loading.value = true
-    const resp = await $api(`sales/search_product?search=${query}`)
-    items.value = resp.products.data
-    loading.value = false
-  } else {
+  // Requiere al menos 3 caracteres para buscar SKU
+  if (!query || query.length < 3) {
     items.value = []
+    return
   }
+
+  // Debounce: esperar 500ms antes de buscar
+  searchTimeout = setTimeout(async () => {
+    loading.value = true
+    try {
+      const resp = await $api(`dispatches/search_product?search=${query}`)
+      items.value = resp.products?.data ?? resp.products ?? []
+      
+      if (items.value.length === 0) {
+        warning_product_search.value = 'No se encontraron productos con ese SKU'
+      }
+    } catch (error) {
+      console.error('Error buscando producto:', error)
+      warning_product_search.value = 'Error al buscar producto. Intente nuevamente.'
+      items.value = []
+    } finally {
+      loading.value = false
+    }
+  }, 500)
 })
 
 watch(select_product, value => {
@@ -204,9 +241,8 @@ const store = async () => {
     return
   }
 
-  await $api('dispatches', {
-    method: 'POST',
-    body: {
+  try {
+    const payload = {
       warehouse_id: warehouse_id.value,
       requester_id: client_selected.value.id,
       requisition_number: requisition_number.value,
@@ -216,20 +252,44 @@ const store = async () => {
       date_document: date_document.value,
       description: description.value,
       details: dispatch_details.value,
-    },
-  })
+    }
 
-  alert('Salida registrada correctamente')
+    await $api('dispatches', {
+      method: 'POST',
+      body: payload,
+    })
 
-  dispatch_details.value = []
-  description.value = null
+    alert('Salida registrada correctamente')
+
+    dispatch_details.value = []
+    description.value = null
+  } catch (error) {
+    console.error('❌ Error al registrar salida:', error)
+    
+    // Mostrar errores de validación si existen
+    if (error.data?.errors) {
+      const errors = Object.entries(error.data.errors)
+        .map(([field, messages]) => `${field}: ${messages.join(', ')}`)
+        .join('\n')
+      alert(`Error de validación:\n\n${errors}`)
+    } else if (error.data?.message) {
+      alert(`Error: ${error.data.message}`)
+    } else {
+      alert('Error al registrar la salida. Por favor, revise los datos e intente nuevamente.')
+    }
+  }
 }
 
 onMounted(config)
+
+onUnmounted(() => {
+  if (searchTimeout) {
+    clearTimeout(searchTimeout)
+  }
+})
 </script>
 
 <template>
-
   <!-- TÍTULO -->
   <div class="d-flex flex-wrap justify-space-between gap-4 mb-6">
     <div class="d-flex flex-column justify-center">
@@ -239,19 +299,25 @@ onMounted(config)
     </div>
   </div>
 
-  <VCard>
-    <VCardText>
-      <VRow dense>
-        <VCol cols="12" md="4">
-          <AppDateTimePicker v-model="date_emision" label="Fecha emisión" />
-        </VCol>
+  <div v-if="!isConfigLoaded" class="text-center pa-4">
+    <VProgressCircular indeterminate color="primary" />
+    <p class="mt-2">Cargando...</p>
+  </div>
 
-        <VCol cols="12" sm="6" md="3">
-          <AppDateTimePicker v-model="date_document" label="Fecha documento de recepción"
-            placeholder="Seleccionar fecha" />
-        </VCol>
+  <template v-else>
+    <VCard>
+      <VCardText>
+        <VRow dense>
+          <VCol cols="12" md="4">
+            <AppDateTimePicker v-model="date_emision" label="Fecha emisión" />
+          </VCol>
 
-        <VCol cols="12" md="4">
+          <VCol cols="12"  md="4">
+            <AppDateTimePicker v-model="date_document" label="Fecha documento de recepción"
+              placeholder="Seleccionar fecha" />
+          </VCol>
+
+          <VCol cols="12" md="4">
           <VSelect
             v-model="warehouse_id"
             :items="warehouses"
@@ -298,10 +364,40 @@ onMounted(config)
             v-model="select_product"
             v-model:search="search_product"
             :items="items"
-            item-title="title"
+            :loading="loading"
+            item-title="sku"
             return-object
-            label="Producto"
+            label="Producto (SKU)"
+            placeholder="Escriba al menos 5 caracteres"
+            clearable
           />
+          
+          <VAlert
+            v-if="warning_warehouse"
+            type="warning"
+            density="compact"
+            class="mt-2"
+          >
+            {{ warning_warehouse }}
+          </VAlert>
+          
+          <VAlert
+            v-if="warning_client_product"
+            type="warning"
+            density="compact"
+            class="mt-2"
+          >
+            {{ warning_client_product }}
+          </VAlert>
+          
+          <VAlert
+            v-if="warning_product_search"
+            type="info"
+            density="compact"
+            class="mt-2"
+          >
+            {{ warning_product_search }}
+          </VAlert>
         </VCol>
 
         <VCol cols="12" md="3">
@@ -329,6 +425,7 @@ onMounted(config)
     <VTable>
       <thead>
         <tr>
+          <th>SKU</th>
           <th>Producto</th>
           <th>Unidad</th>
           <th>Cantidad</th>
@@ -337,6 +434,7 @@ onMounted(config)
       </thead>
       <tbody>
         <tr v-for="(d, i) in dispatch_details" :key="i">
+          <td>{{ d.product.sku }}</td>
           <td>{{ d.product.title }}</td>
           <td>{{ d.unit.name }}</td>
           <td>{{ d.quantity }}</td>
@@ -353,6 +451,7 @@ onMounted(config)
       </VBtn>
     </VCardText>
   </VCard>
+  </template>
 </template>
 
 <style scoped>
@@ -379,5 +478,23 @@ onMounted(config)
 
 .table-responsive {
     overflow-x: auto;
+}
+</style>
+
+<style>
+/* Mejorar visibilidad del texto resaltado en autocomplete - estilos globales */
+.v-autocomplete .v-list-item-title mark,
+.v-autocomplete mark,
+.v-select mark,
+.v-menu mark {
+    background-color: #90caf9 !important;
+    color: #000000 !important;
+    font-weight: 500 !important;
+    padding: 0 2px;
+}
+
+.v-list-item--active mark {
+    background-color: #64b5f6 !important;
+    color: #ffffff !important;
 }
 </style>

@@ -96,7 +96,10 @@ export default defineConfig({
   },
   build: {
     chunkSizeWarningLimit: 5000,
+    sourcemap: false,
+    assetsDir: 'assets',
   },
+  base: '/',
   optimizeDeps: {
     exclude: ['vuetify'],
     entries: [

@@ -37,6 +37,10 @@ COPY nginx.conf /etc/nginx/conf.d/default.conf
 # Copy the built Vue.js files to the Nginx web server directory
 COPY --from=builder /app/dist /usr/share/nginx/html
 
+# Verify files were copied correctly
+RUN ls -la /usr/share/nginx/html && \
+    ls -la /usr/share/nginx/html/assets || true
+
 # Verify the configuration is correct
 RUN nginx -t
 

@@ -13,6 +13,9 @@ const totalPage = ref(0)
    DATA
 ===================== */
 const list_dispatches = ref([])
+const deletingId = ref(null)
+const isCancelDialogVisible = ref(false)
+const dispatchToCancel = ref(null)
 
 /* =====================
    FILTROS
@@ -27,7 +30,7 @@ const range_date = ref(null)
 ===================== */
 const warehouses = ref([])
 const areas = ref([])
-// Fallback de áreas (por id) si el backend no devuelve el listado completo
+// Áreas fijas por ID (el backend solo envía area_id como número)
 const fallbackAreas = [
   { id: 1, name: 'Informática' },
   { id: 2, name: 'Recursos Humanos' },
@@ -36,6 +39,7 @@ const fallbackAreas = [
   { id: 5, name: 'Compras' },
   { id: 6, name: 'Logística' },
   { id: 7, name: 'Gerencia' },
+  { id: 8, name: 'Operaciones' },
 ]
 /* =====================
    LISTAR
@@ -54,8 +58,6 @@ const list = async () => {
       method: 'POST',
       body: data,
     })
-
-    console.log('dispatches API response:', resp)
 
     // Manejo tolerante al formato de respuesta
     const possibleDispatches = resp?.dispatches ?? resp?.data ?? resp
@@ -98,33 +100,73 @@ const reset = () => {
 const config = async () => {
   const resp = await $api('dispatches/config')
   warehouses.value = resp.warehouses ?? []
-  areas.value = resp.areas ?? fallbackAreas
+  // Usar siempre fallbackAreas ya que el backend solo envía area_id como número
+  areas.value = fallbackAreas
 }
 
 /* =====================
    ACCIONES
 ===================== */
 const addDispatch = () => {
-  router.push({ name: 'sales-add' })
+  router.push({ name: 'dispatches-add' })
 }
 
 const showDetail = dispatch => {
   router.push({
-    name: 'sales-edit-id',
+    name: 'dispatches-edit-id',
     params: { id: dispatch.id },
   })
 }
 
-// Devuelve el nombre del área: prioriza `item.area.name`, si viene solo el id busca en `areas`
+const openCancelDialog = item => {
+  if (!item || item.state !== 1) return
+  dispatchToCancel.value = item
+  isCancelDialogVisible.value = true
+}
+
+const confirmCancelDispatch = async () => {
+  const item = dispatchToCancel.value
+  if (!item || item.state !== 1) return
+
+  deletingId.value = item.id
+
+  try {
+    const resp = await $api(`dispatches/${item.id}/cancel`, {
+      method: 'POST',
+    })
+
+    const updated = resp?.dispatch ?? resp?.data ?? resp
+    const nextState = updated?.state ?? 0
+
+    const index = list_dispatches.value.findIndex(d => d.id === item.id)
+    if (index !== -1) {
+      list_dispatches.value[index] = {
+        ...list_dispatches.value[index],
+        state: nextState,
+      }
+    }
+  } catch (error) {
+    console.error('Error canceling dispatch:', error)
+    alert('No se pudo anular la salida')
+  } finally {
+    deletingId.value = null
+    isCancelDialogVisible.value = false
+    dispatchToCancel.value = null
+  }
+}
+
+// Devuelve el nombre del área basándose en el area_id numérico
 const areaLabel = item => {
   if (!item) return '—'
-  if (item.area && typeof item.area === 'object' && item.area.name) return item.area.name
+  
+  // Obtener el area_id (el backend siempre envía solo el número)
+  const areaId = item.area_id ?? item.area
+  if (areaId == null) return '—'
 
-  const id = item.area && typeof item.area === 'number' ? item.area : item.area_id ?? item.area?.id
-  if (id == null) return '—'
-
-  const found = areas.value.find(a => String(a.id) === String(id))
-  return found?.name ?? '—'
+  // Buscar en fallbackAreas usando el ID
+  const areaFound = fallbackAreas.find(a => a.id === Number(areaId))
+  
+  return areaFound?.name ?? `ID: ${areaId}`
 }
 
 onMounted(() => {
@@ -211,6 +253,7 @@ definePage({ meta: { permission: 'list_dispatch' } })
             <th>#</th>
             <th>Solicitante</th>
             <th>Almacén</th>
+            <th>N.º de requisición</th>
             <th>Área</th>
             <th>Usuario</th>
             <th>Fecha</th>
@@ -224,6 +267,7 @@ definePage({ meta: { permission: 'list_dispatch' } })
             <td>{{ item.id }}</td>
             <td>{{ item.requester?.full_name ?? '—' }}</td>
             <td>{{ item.warehouse.name }}</td>
+            <td>{{ item.requisition_number}}</td>
             <td>{{ areaLabel(item) }}</td>
             <td>{{ item.user?.full_name ?? '—' }}</td>
             <td>{{ item.date_emision }}</td>
@@ -236,14 +280,57 @@ definePage({ meta: { permission: 'list_dispatch' } })
               </VChip>
             </td>
             <td class="text-center">
-              <IconBtn size="small" @click="showDetail(item)">
-                <VIcon icon="ri-eye-line" />
-              </IconBtn>
+              <div class="d-flex justify-center gap-1">
+                <IconBtn size="small" @click="showDetail(item)">
+                  <VIcon icon="ri-eye-line" />
+                </IconBtn>
+                <IconBtn
+                  size="small"
+                  v-if="item.state === 1 && isPermission('delete_dispatch')"
+                  :disabled="deletingId === item.id"
+                  @click="openCancelDialog(item)"
+                >
+                  <VIcon icon="ri-delete-bin-line" />
+                </IconBtn>
+              </div>
             </td>
           </tr>
         </tbody>
       </VTable>
     </div>
+
+    <VDialog
+      v-model="isCancelDialogVisible"
+      max-width="520"
+      persistent
+    >
+      <VCard>
+        <VCardTitle>
+          Confirmar anulacion
+        </VCardTitle>
+        <VCardText>
+          Esta accion anula la salida y devuelve el stock al almacen.
+          Desea continuar con la salida
+          <strong>#{{ dispatchToCancel?.id }}</strong>?
+        </VCardText>
+        <VCardActions class="justify-end">
+          <VBtn
+            variant="text"
+            :disabled="deletingId === dispatchToCancel?.id"
+            @click="isCancelDialogVisible = false"
+          >
+            Cancelar
+          </VBtn>
+          <VBtn
+            color="error"
+            :loading="deletingId === dispatchToCancel?.id"
+            @click="confirmCancelDispatch"
+          >
+            Anular salida
+          </VBtn>
+        </VCardActions>
+      </VCard>
+    </VDialog>
 
     <!-- PAGINACIÓN -->
     <VCardActions class="justify-center justify-lg-end">
